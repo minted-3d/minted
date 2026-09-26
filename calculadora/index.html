@@ -159,7 +159,7 @@
   const RING_UNIT = 40 / 100;
   const NFC_UNIT = 25 / 100;
   const FILAMENT_KG_DEFAULT = 100;
-  const MARKUP = 2;
+  const MARGIN = 0.70;
   const PAINT = 1.30;
 
   // Kobra X, Clearance Castle (Tom's Hardware), mesmos ajustes dos dois lados:
@@ -206,7 +206,8 @@
     const grams = job.grams + swaps * WASTE_G;
     const raw = (grams / 1000) * kgPrice() + (DEPRECIATION_PER_H + ENERGY_PER_H) * machineH;
     const cost = raw * (1 + ERROR) + (chaveiro ? RING_UNIT : 0) + (nfc ? NFC_UNIT : 0);
-    return cost * MARKUP * (painted ? PAINT : 1);
+    const price = cost / (1 - MARGIN);
+    return price * (painted ? PAINT : 1);
   }
 
   function showWait(text) {
