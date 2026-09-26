@@ -1,0 +1,15 @@
+# Local Netlify folder
+.netlify
+
+# Dados internos, planilhas e segredos. Ficam só nesta máquina.
+studio/
+*.xlsx
+*.db
+*.db-shm
+*.db-wal
+admin/banco-projetos.jsonl
+admin/config.json
+admin/sheet-config.js
+__pycache__/
+*.pyc
+cloudflare-worker/.wrangler/

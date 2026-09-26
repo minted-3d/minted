@@ -1,0 +1,2357 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Ficha de custo · uso interno | Minted</title>
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet" />
+<meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet" />
+<link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;600;700;800&family=Figtree:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../styles.css" />
+<style>
+  body { background: var(--paper); }
+  .calc-header {
+    position: sticky; top: 0; z-index: 60;
+    background: rgba(255,255,255,.92);
+    backdrop-filter: saturate(150%) blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  .calc-header__inner {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 56px; gap: 16px;
+  }
+  .calc-badge {
+    font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+    letter-spacing: .12em; text-transform: uppercase;
+    color: var(--mint-ink); background: var(--mint);
+    padding: 6px 11px; border-radius: var(--r-full); white-space: nowrap;
+  }
+  .calc-wrap { padding: 20px 0 96px; }
+  .calc-intro { margin-bottom: 20px; }
+  .calc-intro .display { font-size: clamp(28px, 7vw, 44px); }
+  .calc-intro .lead { font-size: 16px; }
+  .calc-grid {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.02fr);
+    gap: 20px; align-items: start;
+  }
+  .ticket, .quote {
+    border-radius: var(--r-lg);
+    padding: 22px 20px 20px;
+  }
+  .ticket {
+    background: var(--card);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-1);
+  }
+  .ticket__head {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+    padding-bottom: 14px; margin-bottom: 18px;
+    border-bottom: 1px dashed var(--line-strong);
+  }
+  .ticket__sku {
+    font-family: var(--font-mono); font-size: 11.5px; letter-spacing: .08em;
+    color: var(--ink-3); text-transform: uppercase;
+  }
+  .stack { display: grid; gap: 16px; }
+  .time-row, .split-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .field { display: flex; flex-direction: column; gap: 7px; }
+  .field > label {
+    font-family: var(--font-display); font-weight: 600; font-size: 14px;
+  }
+  .hint { font-weight: 400; color: var(--ink-3); font-family: var(--font-body); font-size: 13px; }
+  .in { position: relative; display: block; }
+  .in input.big {
+    font-family: var(--font-display); font-size: 26px; font-weight: 700;
+    letter-spacing: -0.03em; padding: 12px 52px 12px 14px; width: 100%;
+  }
+  .in.is-wide input.big { padding-right: 76px; }
+  .in .sfx {
+    position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+    font-family: var(--font-mono); font-size: 13px; font-weight: 500;
+    color: var(--ink-3); pointer-events: none; letter-spacing: .04em;
+  }
+  .field input.url {
+    font-family: var(--font-mono); font-size: 14px; letter-spacing: -0.01em;
+  }
+  .project-name {
+    font-family: var(--font-display); font-weight: 600;
+    font-size: 14.5px; color: var(--navy);
+  }
+  .project-name:empty { display: none; }
+  #minField.is-warn input.big {
+    border-color: #d7263d; color: #d7263d;
+    box-shadow: 0 0 0 3px rgba(215, 38, 61, .14);
+  }
+  #minField.is-warn .sfx { color: #d7263d; }
+  .time-warn {
+    display: none; width: 100%;
+    font-family: var(--font-display); font-weight: 600; font-size: 14.5px;
+    color: #d7263d; background: #fde8eb; border: 1.5px solid #f3b4bc;
+    border-radius: var(--r-md); padding: 12px 14px; cursor: pointer; text-align: left;
+    min-height: 48px;
+  }
+  .time-warn.is-on { display: block; }
+  .time-warn:hover { background: #fbd4d9; }
+
+  .toggle {
+    width: 100%; min-height: 56px; cursor: pointer;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 12px 14px; text-align: left;
+    background: var(--card); border: 1.5px solid var(--line-strong);
+    border-radius: var(--r-md); color: var(--ink);
+  }
+  .toggle b { font-family: var(--font-display); font-size: 15.5px; font-weight: 700; display: block; }
+  .toggle span { font-size: 13px; color: var(--ink-3); }
+  .toggle[aria-pressed="true"] {
+    background: #e7faf2; border-color: var(--mint-deep);
+  }
+  .toggle[aria-pressed="true"] span { color: var(--mint-deep); }
+  .switch {
+    width: 46px; height: 28px; border-radius: 999px; flex: none;
+    background: #c5d0cb; position: relative; transition: background .15s ease;
+  }
+  .switch::after {
+    content: ""; position: absolute; top: 3px; left: 3px;
+    width: 22px; height: 22px; border-radius: 50%; background: #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,.18); transition: transform .15s ease;
+  }
+  .toggle[aria-pressed="true"] .switch { background: var(--mint-deep); }
+  .toggle[aria-pressed="true"] .switch::after { transform: translateX(18px); }
+
+  .seg {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px;
+    background: var(--paper); border: 1px solid var(--line);
+    border-radius: 12px; padding: 5px;
+  }
+  .seg--2 { grid-template-columns: 1fr 1fr; }
+  .seg--pack { grid-template-columns: 1fr 1fr; }
+  .seg button {
+    min-height: 52px; border: 0; border-radius: 10px; cursor: pointer;
+    background: transparent; color: var(--ink-2);
+    font-family: var(--font-display); font-weight: 600; font-size: 13.5px; line-height: 1.15;
+    padding: 8px 6px;
+  }
+  .seg button[aria-pressed="true"] {
+    background: var(--ink); color: #fff;
+    box-shadow: 0 4px 14px rgba(13,27,42,.18);
+  }
+  .seg--pack button {
+    min-height: 64px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  }
+  .seg--pack button small {
+    font-family: var(--font-mono); font-size: 10.5px; font-weight: 500;
+    letter-spacing: .02em; opacity: .72;
+  }
+  [hidden] { display: none !important; }
+  form[name="minted-projetos"] { display: none !important; }
+  .mode-bar {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px;
+    background: var(--paper); border: 1.5px solid var(--line-strong);
+    border-radius: 12px; padding: 5px; margin-bottom: 4px;
+  }
+  .mode-bar button {
+    min-height: 48px; border: 0; border-radius: 10px; cursor: pointer;
+    background: transparent; color: var(--ink-2);
+    font-family: var(--font-display); font-weight: 700; font-size: 13px;
+    line-height: 1.15; padding: 8px 4px;
+  }
+  .mode-bar button[aria-pressed="true"] {
+    background: var(--navy-deep); color: #fff;
+    box-shadow: 0 4px 14px rgba(13,27,42,.18);
+  }
+  .adv-block {
+    display: none; grid-gap: 16px;
+    padding: 14px; border-radius: var(--r-md);
+    background: #f3faf7; border: 1.5px dashed var(--mint-deep);
+  }
+  .adv-block.is-on { display: grid; gap: 16px; }
+  .adv-block > .field:last-child { margin-bottom: 0; }
+  .pack-panel { display: none; }
+  .pack-panel.is-on { display: grid; gap: 7px; }
+  .pack-panel > label {
+    font-family: var(--font-display); font-weight: 600; font-size: 14px;
+  }
+  .yn-cost {
+    font-family: var(--font-mono); font-size: 12px; font-weight: 500;
+    color: var(--mint-deep);
+  }
+
+  .analysis {
+    display: none; margin-top: 16px;
+    padding-top: 14px; border-top: 1px solid rgba(255,255,255,.1);
+  }
+  .analysis.is-on { display: block; }
+  .analysis__head {
+    font-family: var(--font-mono); font-size: 11.5px; letter-spacing: .14em;
+    text-transform: uppercase; color: #56e6b8; margin-bottom: 10px;
+  }
+  .kpis {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 7px;
+  }
+  .kpi {
+    border-radius: 8px; padding: 10px 11px;
+    border: 1px solid rgba(255,255,255,.1);
+    background: rgba(255,255,255,.04);
+  }
+  .kpi span {
+    display: block; font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--on-dark-muted);
+  }
+  .kpi b {
+    display: block; margin-top: 4px; font-family: var(--font-display);
+    font-weight: 700; font-size: 18px; letter-spacing: -0.03em; color: #fff;
+  }
+  .kpi em {
+    display: block; margin-top: 2px; font-style: normal;
+    font-size: 12px; color: var(--on-dark-muted);
+  }
+  .kpi--mint { background: rgba(46, 220, 162, .14); border-color: rgba(46, 220, 162, .28); }
+  .kpi--wide { grid-column: 1 / -1; }
+  .analysis__note {
+    margin-top: 10px; font-size: 13px; color: var(--on-dark-muted); line-height: 1.45;
+  }
+
+  .assumptions {
+    display: grid; gap: 6px;
+    background: var(--paper); border: 1px solid var(--line);
+    border-radius: var(--r-md); padding: 12px 14px;
+  }
+  .assumptions li {
+    list-style: none; display: flex; justify-content: space-between; gap: 10px;
+    font-size: 13px; color: var(--ink-2);
+  }
+  .assumptions b {
+    font-family: var(--font-mono); font-weight: 500; font-size: 12px; color: var(--ink);
+    text-align: right;
+  }
+
+  .kobra {
+    margin-top: 28px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow: var(--shadow-1);
+    padding: 22px 22px 18px;
+    scroll-margin-top: 76px;
+  }
+  .kobra h2 {
+    font-size: clamp(26px, 3vw, 34px);
+    letter-spacing: -0.03em;
+  }
+  .kobra h3 {
+    margin-top: 22px;
+    font-size: 18px;
+  }
+  .kobra p, .kobra li { color: var(--ink-2); font-size: 15.5px; }
+  .kobra p { margin-top: 8px; }
+  .kobra ol, .kobra ul { margin: 10px 0 0 1.15em; display: grid; gap: 6px; }
+  .kobra .kobra__lead { max-width: 68ch; }
+  .kobra-facts {
+    margin-top: 12px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  .kobra-facts div {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 10px 12px;
+  }
+  .kobra-facts span {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .kobra-facts b {
+    display: block;
+    margin-top: 4px;
+    font-family: var(--font-display);
+    font-size: 16px;
+    color: var(--ink);
+  }
+  .kobra-table-wrap { margin-top: 12px; overflow-x: auto; }
+  .kobra table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14.5px;
+  }
+  .kobra th, .kobra td {
+    text-align: right;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+  }
+  .kobra th:first-child, .kobra td:first-child { text-align: left; color: var(--ink-2); }
+  .kobra th {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    font-weight: 500;
+  }
+  .kobra tr.is-total td { font-weight: 700; color: var(--ink); }
+  @media (max-width: 800px) {
+    .kobra-facts { grid-template-columns: 1fr 1fr; }
+    .kobra { padding: 18px 14px 14px; }
+  }
+
+  .quote {
+    background: var(--navy-deep); color: var(--on-dark);
+    box-shadow: var(--shadow-2);
+    position: sticky; top: 70px;
+  }
+  .quote h2 { color: #fff; }
+  .quote__empty { color: var(--on-dark-muted); font-size: 15.5px; margin-top: 8px; }
+  .quote[data-ready="false"] .quote__live { display: none; }
+  .quote[data-ready="true"] .quote__empty { display: none; }
+  .big-price { margin-top: 8px; }
+  .big-price .label {
+    font-family: var(--font-mono); font-size: 11.5px; letter-spacing: .14em;
+    text-transform: uppercase; color: #56e6b8;
+  }
+  .big-price strong {
+    display: block; font-family: var(--font-display);
+    font-size: clamp(32px, 6vw, 46px); font-weight: 800;
+    letter-spacing: -0.04em; line-height: 1.05; color: #fff; margin-top: 4px;
+  }
+  .per-unit { color: var(--on-dark-muted); font-size: 14.5px; margin-top: 4px; }
+  .range-card {
+    margin-top: 18px; padding: 14px;
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: var(--r-md);
+  }
+  .range-card .range-title {
+    font-family: var(--font-display); font-weight: 600; font-size: 15px; color: #fff;
+  }
+  .range-card .range-nums {
+    font-family: var(--font-display); font-weight: 700; font-size: 20px;
+    letter-spacing: -0.03em; color: #fff; margin-top: 4px;
+  }
+  .range-card .range-note { font-size: 13.5px; color: var(--on-dark-muted); margin-top: 6px; }
+  .chart { display: grid; gap: 7px; margin-top: 14px; }
+  .chart__row {
+    --c: #1e8fbe;
+    --p: 100%;
+    position: relative; isolation: isolate;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    min-height: 46px; padding: 8px 12px; border-radius: 8px; overflow: hidden;
+    background: color-mix(in srgb, var(--c) 22%, #071018);
+    color: #fff;
+  }
+  .chart__row::before {
+    content: ""; position: absolute; inset: 0 auto 0 0; width: var(--p);
+    background: var(--c); z-index: -1; opacity: .92;
+  }
+  .chart__lab {
+    font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+    letter-spacing: .08em; text-transform: uppercase;
+    text-shadow: 0 1px 2px rgba(0,0,0,.35);
+  }
+  .chart__val {
+    font-family: var(--font-display); font-weight: 700; font-size: 16px;
+    letter-spacing: -0.02em; white-space: nowrap;
+    text-shadow: 0 1px 2px rgba(0,0,0,.35);
+  }
+  .nego {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px; margin-top: 12px;
+  }
+  .nego__cell {
+    border-radius: 8px; padding: 10px 8px; text-align: center;
+    border: 1px solid rgba(255,255,255,.1);
+  }
+  .nego__cell span {
+    display: block; font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--on-dark-muted);
+  }
+  .nego__cell b {
+    display: block; margin-top: 5px; font-family: var(--font-display);
+    font-weight: 700; font-size: 14px; letter-spacing: -0.02em; color: #fff;
+  }
+  .nego__cell--deep { background: rgba(15, 156, 111, .22); }
+  .nego__cell--ok { background: rgba(46, 220, 162, .18); }
+  .nego__cell--ask { background: rgba(255,255,255,.08); }
+  .lines { margin-top: 8px; display: grid; gap: 0; }
+  .comp { margin-top: 16px; border-top: 1px solid rgba(255,255,255,.1); padding-top: 8px; }
+  .comp > summary {
+    cursor: pointer; list-style: none; color: #56e6b8;
+    font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em;
+    text-transform: uppercase; padding: 8px 0;
+  }
+  .comp > summary::-webkit-details-marker { display: none; }
+  .lines li {
+    list-style: none; display: grid; grid-template-columns: 1fr auto;
+    gap: 12px; padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    font-size: 14.5px; color: var(--on-dark-muted);
+  }
+  .lines .mono {
+    font-family: var(--font-mono); font-size: 13.5px; color: #eef5f2; font-weight: 500;
+    text-align: right; max-width: 58%; overflow-wrap: anywhere;
+  }
+  .lines .total { color: #fff; font-weight: 600; }
+  .lines .total .mono { font-family: var(--font-display); font-size: 17px; font-weight: 700; }
+  .copy-row { margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn--ghost {
+    background: transparent; color: var(--on-dark);
+    border: 1.5px solid rgba(255,255,255,.25);
+  }
+  .btn--sheet {
+    background: #fff; color: var(--navy-deep);
+  }
+  .btn--sheet:hover { background: #e7faf2; }
+  .btn--sheet.is-saved { background: #56e6b8; color: #0d1b2a; }
+  .copy-ok { font-size: 13px; color: #56e6b8; align-self: center; }
+  .parts-bar {
+    display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+  }
+  .part-chip {
+    min-height: 40px; border-radius: 999px; cursor: pointer;
+    padding: 8px 14px; border: 1.5px solid var(--line-strong);
+    background: var(--card); color: var(--ink);
+    font-family: var(--font-display); font-weight: 700; font-size: 13px;
+  }
+  .part-chip.is-on {
+    background: var(--navy-deep); color: #fff; border-color: var(--navy-deep);
+  }
+  .part-chip.is-saved:not(.is-on) {
+    border-color: var(--mint-deep); color: var(--mint-deep);
+  }
+  .part-add {
+    min-height: 40px; border-radius: 999px; cursor: pointer;
+    padding: 8px 14px; border: 1.5px dashed var(--line-strong);
+    background: transparent; color: var(--ink-2);
+    font-family: var(--font-display); font-weight: 700; font-size: 13px;
+  }
+  .part-add:hover { border-color: var(--mint-deep); color: var(--mint-deep); }
+  .project-total {
+    display: none; margin-top: 12px; padding: 12px 14px;
+    border-radius: 10px; background: rgba(46,220,162,.14);
+    border: 1px solid rgba(46,220,162,.28);
+  }
+  .project-total.is-on { display: block; }
+  .project-total span {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em;
+    text-transform: uppercase; color: #56e6b8;
+  }
+  .project-total b {
+    display: block; margin-top: 4px;
+    font-family: var(--font-display); font-size: 22px; color: #fff;
+  }
+  .sheet-setup {
+    border: 0; border-radius: 18px; padding: 0;
+    width: min(540px, calc(100vw - 24px));
+    box-shadow: var(--shadow-2); color: var(--ink);
+  }
+  .sheet-setup::backdrop { background: rgba(13,27,42,.45); }
+  .sheet-setup__body { padding: 22px 22px 18px; }
+  .sheet-setup h3 { font-family: var(--font-display); font-size: 22px; margin: 0 0 8px; }
+  .sheet-setup p, .sheet-setup li {
+    color: var(--ink-2); font-size: 14.5px; line-height: 1.45;
+  }
+  .sheet-setup ol { margin: 12px 0 14px; padding-left: 18px; }
+  .sheet-setup li { margin: 8px 0; }
+  .sheet-setup__actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+  .sheet-setup a { color: var(--mint-deep); font-weight: 600; }
+  .wa-card {
+    margin-top: 16px; background: #e7f8ee;
+    color: #0d1b2a; border-radius: 14px 14px 4px 14px;
+    padding: 14px 14px 12px;
+  }
+  .wa-card__kicker {
+    font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .12em;
+    text-transform: uppercase; color: #0f9c6f; margin-bottom: 8px;
+  }
+  .wa-msg { font-size: 14.5px; line-height: 1.5; }
+  .wa-msg .k {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em;
+    text-transform: uppercase; color: #5a6b63; display: block; margin-top: 10px;
+  }
+  .wa-msg .k:first-child { margin-top: 0; }
+  .wa-msg .v { display: block; font-weight: 600; color: #0d1b2a; }
+  .wa-msg a { color: #0b6e4f; word-break: break-all; font-size: 12.5px; }
+  .wa-msg .pair {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; margin-top: 10px;
+  }
+  .wa-msg .ask {
+    margin-top: 10px; padding-top: 10px; border-top: 1px dashed #b7dcc8;
+    font-family: var(--font-display); font-size: 22px; font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+  .wa-msg .ask small {
+    display: block; font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: .1em; text-transform: uppercase; font-weight: 500;
+    color: #5a6b63; margin-bottom: 2px;
+  }
+  @media (max-width: 900px) {
+    .calc-grid { grid-template-columns: 1fr; }
+    .quote { position: static; }
+    .in input.big { font-size: 22px; }
+    .seg { grid-template-columns: 1fr; }
+    .seg--2, .seg--pack { grid-template-columns: 1fr 1fr; }
+    .mode-bar { grid-template-columns: 1fr 1fr 1fr; }
+    .seg button { min-height: 48px; }
+    .kpis { grid-template-columns: 1fr 1fr; }
+    .wa-msg .pair { grid-template-columns: 1fr; }
+    .nego { grid-template-columns: 1fr; }
+    .nego__cell b { font-size: 18px; }
+    .copy-dock {
+      position: sticky; bottom: 0; z-index: 40;
+      margin: 16px -20px -20px; padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
+      background: linear-gradient(180deg, transparent, var(--navy-deep) 18%);
+    }
+    .copy-dock .btn { width: 100%; min-height: 48px; white-space: normal; }
+  }
+  .mw-status { font-size: 13px; color: var(--ink-3); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .mw-status:empty { display: none; }
+  .mw-status.is-ok { color: var(--mint-deep); }
+  .mw-status.is-err { color: #d7263d; }
+  .mw-profiles { display: flex; flex-wrap: wrap; gap: 6px; }
+  .mw-profiles:empty { display: none; }
+  .mw-profiles .part-chip { min-height: 34px; padding: 6px 12px; font-size: 12px; text-align: left; }
+  .mw-profiles .part-chip small { display: block; font-family: var(--font-mono); font-weight: 500; font-size: 11px; opacity: .8; }
+  .margin-field[hidden] { display: none !important; }
+  .slider { display: grid; gap: 6px; padding: 2px 2px 0; }
+  .slider input[type=range] {
+    -webkit-appearance: none; appearance: none; width: 100%; height: 26px;
+    background: transparent; cursor: pointer; margin: 0; display: block;
+  }
+  .slider input[type=range]::-webkit-slider-runnable-track {
+    height: 4px; border-radius: 999px; background: rgba(255,255,255,.22);
+  }
+  .slider input[type=range]::-moz-range-track {
+    height: 4px; border-radius: 999px; background: rgba(255,255,255,.22);
+  }
+  .slider input[type=range]::-moz-range-progress { height: 4px; border-radius: 999px; background: rgba(255,255,255,.22); }
+  .slider input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 8px; height: 24px; margin-top: -10px;
+    border-radius: 3px; background: #fff; border: 0; box-shadow: 0 1px 6px rgba(0,0,0,.45);
+  }
+  .slider input[type=range]::-moz-range-thumb {
+    width: 8px; height: 24px; border-radius: 3px; background: #fff; border: 0;
+    box-shadow: 0 1px 6px rgba(0,0,0,.45);
+  }
+  .slider input[type=range]:focus-visible::-webkit-slider-thumb { outline: 2px solid #56e6b8; outline-offset: 2px; }
+  .slider__out { display: flex; align-items: baseline; justify-content: center; gap: 10px; text-align: center; }
+  .slider__out b {
+    font-family: var(--font-display); font-size: 26px; letter-spacing: -0.02em; color: #fff;
+  }
+  .slider__out span { font-size: 13.5px; color: var(--on-dark-muted); }
+  .slider__ends {
+    display: flex; justify-content: space-between;
+    font-family: var(--font-mono); font-size: 11.5px; color: var(--on-dark-muted);
+  }
+  .market {
+    margin-top: 16px; padding-top: 14px;
+    border-top: 1px solid rgba(255,255,255,.1);
+  }
+  .market[hidden] { display: none !important; }
+  .market__head {
+    font-family: var(--font-mono); font-size: 11.5px; letter-spacing: .14em;
+    text-transform: uppercase; color: #56e6b8; margin-bottom: 6px;
+  }
+  .market__query { font-size: 13px; color: var(--on-dark-muted); margin: 0 0 10px; }
+  .market__verdict {
+    border-radius: 8px; padding: 10px 12px; margin-bottom: 10px;
+    background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+  }
+  .market__verdict b {
+    display: block; font-family: var(--font-display); font-size: 16px; font-weight: 700;
+    letter-spacing: -0.02em; color: #fff;
+  }
+  .market__verdict span { display: block; margin-top: 3px; font-size: 13px; color: var(--on-dark-muted); }
+  .market__verdict.is-low { background: rgba(46, 220, 162, .14); border-color: rgba(46, 220, 162, .28); }
+  .market__verdict.is-mid { background: rgba(255,255,255,.06); }
+  .market__verdict.is-high { background: rgba(212, 160, 23, .16); border-color: rgba(212, 160, 23, .32); }
+  .market__rows { display: grid; gap: 6px; }
+  .market__row {
+    display: grid; grid-template-columns: 1.1fr auto;
+    gap: 8px; align-items: baseline;
+    padding: 8px 10px; border-radius: 8px;
+    background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
+    color: #fff; text-decoration: none;
+  }
+  .market__row:hover { border-color: rgba(86, 230, 184, .45); }
+  .market__row small {
+    display: block; font-family: var(--font-mono); font-size: 10.5px;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--on-dark-muted);
+  }
+  .market__row b { font-family: var(--font-display); font-size: 15px; font-weight: 700; }
+  .market__row em {
+    font-style: normal; font-family: var(--font-mono); font-size: 12px; color: #eef5f2;
+    text-align: right;
+  }
+  .market__list { margin-top: 10px; display: grid; gap: 0; }
+  .market__list a {
+    display: grid; grid-template-columns: 1fr auto; gap: 10px;
+    padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,.08);
+    color: var(--on-dark-muted); text-decoration: none; font-size: 13.5px;
+  }
+  .market__list a:hover { color: #fff; }
+  .market__list .mono {
+    font-family: var(--font-mono); font-size: 12.5px; color: #eef5f2; white-space: nowrap;
+  }
+  .market__list .src {
+    display: block; font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: .08em; text-transform: uppercase; color: #56e6b8; margin-bottom: 2px;
+  }
+</style>
+  <script src="sheet-config.js"></script>
+  <script src="mw-worker.js"></script>
+</head>
+<body>
+
+<form name="minted-projetos" method="POST" action="/admin/obrigado.html" data-netlify="true" data-netlify-honeypot="bot-field" hidden>
+  <input type="hidden" name="form-name" value="minted-projetos" />
+  <p class="hidden"><label>Não preencha <input name="bot-field" /></label></p>
+  <input name="data" />
+  <input name="projeto" />
+  <input name="link" />
+  <input name="parte" />
+  <input name="nParte" />
+  <input name="modo" />
+  <input name="unidades" />
+  <input name="tempoH" />
+  <input name="tempo" />
+  <input name="calibragemMin" />
+  <input name="pesoG" />
+  <input name="filamentoKg" />
+  <input name="acabamento" />
+  <input name="personalizado" />
+  <input name="argola" />
+  <input name="nfc" />
+  <input name="embalagem" />
+  <input name="custoFilamento" />
+  <input name="custoDepreciacao" />
+  <input name="custoEnergia" />
+  <input name="custoErro" />
+  <input name="custoExtras" />
+  <input name="custo" />
+  <input name="margemPct" />
+  <input name="margemReais" />
+  <input name="pinturaExtra" />
+  <input name="preco" />
+  <input name="precoUn" />
+  <input name="lucro" />
+  <input name="negoOk" />
+  <input name="negoPiso" />
+  <input name="roi" />
+  <input name="ros" />
+  <input name="markup" />
+  <input name="json" />
+</form>
+
+<header class="calc-header">
+  <div class="container calc-header__inner">
+    <a href="../index.html" class="brand" aria-label="Minted — página inicial">
+      <svg class="brand__mark" viewBox="0 0 200 210" aria-hidden="true">
+        <defs><linearGradient id="gnav" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3be08f"/><stop offset="1" stop-color="#24c3cf"/></linearGradient></defs>
+        <path d="M168 61 L168 139 L100 178" fill="none" stroke="#16345f" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M168 61 L100 22 L32 61 L32 139" fill="none" stroke="url(#gnav)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M100 72 L131 90 L100 108 L69 90 Z" fill="#3fe0a4"/><path d="M69 90 L100 108 L100 144 L69 126 Z" fill="#24c3cf"/><path d="M100 108 L131 90 L131 126 L100 144 Z" fill="#1e8fbe"/>
+      </svg>
+      <span class="brand__name">Mint<span class="td">3D</span></span>
+    </a>
+    <span class="calc-badge">Uso interno</span>
+  </div>
+</header>
+
+<main class="calc-wrap">
+  <div class="container">
+    <div class="calc-intro">
+      <span class="spec" id="introSpec">Ficha de custo</span>
+      <h1 class="display mt-16">Custo e preço, na hora.</h1>
+      <p class="lead mt-16" id="introLead">Link, tempo, gramas totais e quantas peças na prancha. O resumo já sai pronto para o WhatsApp.</p>
+    </div>
+
+    <div class="calc-grid">
+      <form class="ticket" id="calcForm" autocomplete="off">
+        <div class="ticket__head">
+          <h2 class="h3">Peça</h2>
+          <span class="ticket__sku">ao vivo</span>
+        </div>
+
+        <div class="stack">
+          <div class="field">
+            <label>Calculadora</label>
+            <div class="mode-bar" role="group" aria-label="Modo da calculadora">
+              <button type="button" data-mode="simple" aria-pressed="true">Simples</button>
+              <button type="button" data-mode="advanced" aria-pressed="false">Avançada</button>
+              <button type="button" data-mode="personal" aria-pressed="false">Proj. Pessoais</button>
+            </div>
+            <p class="hint" id="modeHint">Impressão, filamento e margem. Sem argola, NFC ou embalagem.</p>
+          </div>
+
+          <div class="field">
+            <label for="projeto">Projeto</label>
+            <input class="url" type="text" id="projeto" name="projeto" inputmode="url" placeholder="https://makerworld.com/…" spellcheck="false" autocomplete="off" />
+            <p class="project-name" id="projectName"></p>
+            <p class="mw-status" id="mwStatus" aria-live="polite"></p>
+            <div class="mw-profiles" id="mwProfiles"></div>
+            <p class="hint">Ao colar o link do MakerWorld, a ficha puxa tempo e peso e busca o preço praticado na Shopee, Mercado Livre e Temu.</p>
+          </div>
+
+          <div class="field">
+            <label>Partes deste projeto</label>
+            <div class="parts-bar" id="partsBar"></div>
+            <p class="hint">Cada parte tem o próprio tempo, peso e preço. Confirme uma a uma na planilha.</p>
+          </div>
+
+          <div class="field">
+            <label for="parteNome">Nome da parte</label>
+            <input class="url" type="text" id="parteNome" name="parteNome" placeholder="Corpo, base, argola…" spellcheck="false" autocomplete="off" />
+          </div>
+
+          <div class="field">
+            <label for="unidades">Unidades na prancha</label>
+            <div class="in">
+              <input class="big" type="number" id="unidades" name="unidades" min="1" step="1" inputmode="numeric" placeholder="1" value="1" />
+              <span class="sfx">un</span>
+            </div>
+            <p class="hint">Multiplica o tempo e o peso de 1 unidade. A calibragem de 20 min é uma só e se divide entre as peças.</p>
+          </div>
+
+          <div class="field">
+            <label for="locoPct">Locomoção por unidade extra</label>
+            <div class="in">
+              <input class="big" type="text" id="locoPct" name="locoPct" inputmode="decimal" placeholder="5" value="5" />
+              <span class="sfx">%</span>
+            </div>
+            <p class="hint" id="locoHint">Tempo extra do bico viajando entre as peças. Soma essa % ao tempo a cada unidade além da primeira.</p>
+          </div>
+
+          <div class="field">
+            <label>Tempo de impressão · 1 unidade</label>
+            <div class="time-row">
+              <div class="in">
+                <input class="big" type="number" id="horas" name="horas" min="0" step="any" inputmode="decimal" placeholder="0" aria-label="Horas" />
+                <span class="sfx">h</span>
+              </div>
+              <div class="in" id="minField">
+                <input class="big" type="number" id="minutos" name="minutos" min="0" step="1" inputmode="numeric" placeholder="0" aria-label="Minutos" />
+                <span class="sfx">min</span>
+              </div>
+            </div>
+            <button type="button" class="time-warn" id="minWarn" hidden></button>
+          </div>
+
+          <div class="split-row">
+            <div class="field">
+              <label for="gramas">Peso · 1 unidade</label>
+              <div class="in">
+                <input class="big" type="text" id="gramas" name="gramas" inputmode="decimal" placeholder="0" />
+                <span class="sfx">g</span>
+              </div>
+            </div>
+            <div class="field">
+              <label for="precoKg">Filamento</label>
+              <div class="in is-wide">
+                <input class="big" type="text" id="precoKg" name="precoKg" inputmode="decimal" placeholder="0,00" />
+                <span class="sfx">R$/kg</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="field" id="customField">
+            <label>Tipo</label>
+            <button type="button" class="toggle" id="btnCustom" aria-pressed="false">
+              <span>
+                <b>Produto personalizado</b>
+                <span id="customHint">Margem 70%. Toque para 120%.</span>
+              </span>
+              <i class="switch" aria-hidden="true"></i>
+            </button>
+          </div>
+
+          <div class="field margin-field" id="marginField" hidden>
+            <label for="margemInput">Margem</label>
+            <div class="slider">
+              <div class="slider__out" id="margemOut"><b>70%</b><span id="margemPreco"></span></div>
+              <input type="range" id="margemInput" name="margemInput" min="0" max="100" step="5" value="70" aria-describedby="margemOut" />
+              <div class="slider__ends"><span>0%</span><span>100%</span></div>
+            </div>
+            <p class="hint">Arraste para achar o preço. Aplicada sobre o custo (impressão + adicionais). Padrão 70%; personalizado 100%.</p>
+          </div>
+
+          <div class="field">
+            <label>Acabamento</label>
+            <div class="seg" role="group" aria-label="Acabamento">
+              <button type="button" data-finish="1cor" aria-pressed="true">1 cor</button>
+              <button type="button" data-finish="2cores" aria-pressed="false">2 cores</button>
+              <button type="button" data-finish="pintado" aria-pressed="false">Pintado à mão</button>
+            </div>
+            <p class="hint" id="finishHint">Preço normal, com margem.</p>
+          </div>
+
+          <div class="adv-block" id="advancedPanel">
+            <div class="field">
+              <label>É chaveiro com argola?</label>
+              <div class="seg seg--2" role="group" aria-label="Chaveiro com argola">
+                <button type="button" data-ring="nao" aria-pressed="true">Não</button>
+                <button type="button" data-ring="sim" aria-pressed="false">Sim</button>
+              </div>
+              <p class="hint">100 argolas custam R$ 40,00 · <span class="yn-cost">R$ 0,40 / un</span></p>
+            </div>
+
+            <div class="field">
+              <label>Leva etiqueta NFC?</label>
+              <div class="seg seg--2" role="group" aria-label="Etiqueta NFC">
+                <button type="button" data-nfc="nao" aria-pressed="true">Não</button>
+                <button type="button" data-nfc="sim" aria-pressed="false">Sim</button>
+              </div>
+              <p class="hint">100 etiquetas NFC custam R$ 25,00 · <span class="yn-cost">R$ 0,25 / un</span></p>
+            </div>
+
+            <div class="field">
+              <label>É embalado?</label>
+              <div class="seg seg--2" role="group" aria-label="Peça embalada">
+                <button type="button" data-packed="nao" aria-pressed="true">Não</button>
+                <button type="button" data-packed="sim" aria-pressed="false">Sim</button>
+              </div>
+              <p class="hint" id="packHint">Sem embalagem no custo.</p>
+            </div>
+
+            <div class="pack-panel" id="packPanel">
+              <label>Tipo de embalagem</label>
+              <div class="seg seg--pack" role="group" aria-label="Tipo de embalagem">
+                <button type="button" data-pack="kraft" aria-pressed="true">Kraft<small>R$ 15 / 100</small></button>
+                <button type="button" data-pack="plastico" aria-pressed="false">Plástico<small>R$ 7 / 100</small></button>
+                <button type="button" data-pack="organza" aria-pressed="false">Organza<small>R$ 25 / 100</small></button>
+                <button type="button" data-pack="caixa" aria-pressed="false">Caixinha<small>R$ 60 / 100</small></button>
+              </div>
+              <p class="hint" id="packTypeHint">Saquinho kraft 8×12 cm. R$ 0,15 / un.</p>
+            </div>
+          </div>
+
+          <ul class="assumptions" aria-label="Premissas">
+            <li><span>Calibragem</span><b id="assCalib">+ 20 min · 1 un</b></li>
+            <li><span>Folga de erro</span><b>+ 15%</b></li>
+            <li><span>Margem</span><b id="assMargem">70%</b></li>
+            <li><span>Depreciação + luz</span><b>R$ 0,60/h + R$ 1,00/h</b></li>
+            <li id="assAsset" hidden><span>Ativo (impressora)</span><b>R$ 3.000</b></li>
+            <li id="assRing" hidden><span>Argola</span><b>R$ 40 / 100 un</b></li>
+            <li id="assNfc" hidden><span>NFC</span><b>R$ 25 / 100 un</b></li>
+            <li id="assPack" hidden><span>Embalagem</span><b id="assPackVal">—</b></li>
+          </ul>
+        </div>
+      </form>
+
+      <aside class="quote" id="quote" data-ready="false" aria-live="polite">
+        <span class="spec spec--on-dark" id="quoteKicker">Resultado</span>
+        <h2 class="h2 mt-8">Sua cobrança</h2>
+        <p class="quote__empty">Preencha tempo ou gramas. O preço atualiza na hora.</p>
+
+        <div class="quote__live">
+          <div class="big-price">
+            <span class="label">Preço a pedir</span>
+            <strong id="precoPedir">R$ 0,00</strong>
+            <p class="per-unit" id="perUnit"></p>
+          </div>
+
+          <div class="range-card">
+            <div class="range-title" id="rangeTitle">Faixa de negociação</div>
+            <div class="range-nums" id="faixa">R$ 0,00 — R$ 0,00</div>
+            <p class="range-note" id="faixaNota"></p>
+            <div class="chart" id="chart"></div>
+            <div class="nego" id="negoRow">
+              <div class="nego__cell nego__cell--deep">
+                <span>Pode ceder</span>
+                <b id="negoDeep">R$ 0,00</b>
+              </div>
+              <div class="nego__cell nego__cell--ok">
+                <span>Confortável</span>
+                <b id="negoOk">R$ 0,00</b>
+              </div>
+              <div class="nego__cell nego__cell--ask">
+                <span>Pedir</span>
+                <b id="negoAsk">R$ 0,00</b>
+              </div>
+            </div>
+          </div>
+
+          <div class="analysis" id="analysis">
+            <div class="analysis__head">Análise financeira</div>
+            <div class="kpis">
+              <div class="kpi kpi--mint">
+                <span>ROI</span>
+                <b id="kpiRoi">—</b>
+                <em>lucro ÷ custo</em>
+              </div>
+              <div class="kpi kpi--mint">
+                <span>ROA</span>
+                <b id="kpiRoa">—</b>
+                <em>lucro ÷ impressora</em>
+              </div>
+              <div class="kpi">
+                <span>Margem / ROS</span>
+                <b id="kpiRos">—</b>
+                <em>lucro ÷ preço</em>
+              </div>
+              <div class="kpi">
+                <span>Markup</span>
+                <b id="kpiMarkup">—</b>
+                <em>preço ÷ custo</em>
+              </div>
+              <div class="kpi">
+                <span>Lucro / hora</span>
+                <b id="kpiLucroH">—</b>
+                <em>máquina + calibragem</em>
+              </div>
+              <div class="kpi">
+                <span>CMV</span>
+                <b id="kpiCmv">—</b>
+                <em>custo ÷ preço</em>
+              </div>
+              <div class="kpi">
+                <span>Payback impressora</span>
+                <b id="kpiPayback">—</b>
+                <em>pedidos iguais a este</em>
+              </div>
+              <div class="kpi">
+                <span>Horas até payback</span>
+                <b id="kpiPayH">—</b>
+                <em>produção equivalente</em>
+              </div>
+              <div class="kpi kpi--wide">
+                <span>Por unidade</span>
+                <b id="kpiUnit">—</b>
+                <em id="kpiUnitNote">custo · preço · lucro</em>
+              </div>
+            </div>
+            <p class="analysis__note" id="kpiNote"></p>
+          </div>
+
+          <details class="comp">
+            <summary>Ver composição</summary>
+            <ul class="lines">
+              <li><span>Projeto</span><span class="mono" id="outProjeto">—</span></li>
+              <li><span>Unidades</span><span class="mono" id="outUn">—</span></li>
+              <li><span>Tempo</span><span class="mono" id="outTempo">—</span></li>
+              <li id="rowLoco" hidden><span id="outLocoLabel">Locomoção</span><span class="mono" id="outLoco">—</span></li>
+              <li><span>Calibragem</span><span class="mono" id="outCalib">—</span></li>
+              <li><span>Peso total</span><span class="mono" id="outPeso">—</span></li>
+              <li><span>Filamento</span><span class="mono" id="outFilamento">—</span></li>
+              <li><span>Depreciação</span><span class="mono" id="outDep">—</span></li>
+              <li><span>Energia</span><span class="mono" id="outLuz">—</span></li>
+              <li><span>Folga de erro 15%</span><span class="mono" id="outErro">—</span></li>
+              <li id="rowRing" hidden><span>Argola</span><span class="mono" id="outRing">—</span></li>
+              <li id="rowNfc" hidden><span>Etiqueta NFC</span><span class="mono" id="outNfc">—</span></li>
+              <li id="rowPack" hidden><span id="outPackLabel">Embalagem</span><span class="mono" id="outPack">—</span></li>
+              <li class="total"><span>Custo estimado</span><span class="mono" id="outCusto">—</span></li>
+              <li><span id="outMargemLabel">Margem 70%</span><span class="mono" id="outMargem">—</span></li>
+              <li id="rowPaint" hidden><span>Pintura à mão (2×)</span><span class="mono" id="outPaint">—</span></li>
+              <li><span>Lucro no pedido</span><span class="mono" id="outLucroPedir">—</span></li>
+            </ul>
+          </details>
+
+          <div class="wa-card">
+            <div class="wa-card__kicker">Prévia · WhatsApp</div>
+            <div class="wa-msg" id="waPreview"></div>
+          </div>
+
+          <div class="project-total" id="projectTotal"></div>
+
+          <div class="copy-row copy-dock">
+            <button type="button" class="btn btn--mint" id="copyBtn">Copiar para o WhatsApp</button>
+            <button type="button" class="btn btn--sheet" id="confirmBtn">Confirmar para Banco de Dados</button>
+            <button type="button" class="btn btn--ghost btn--sm" id="clearBtn">Limpar</button>
+            <span class="copy-ok" id="copyOk" hidden></span>
+          </div>
+        </div>
+
+        <div class="market" id="marketBox" hidden>
+          <div class="market__head">Preço no mercado</div>
+          <p class="market__query" id="marketQuery"></p>
+          <div class="market__verdict" id="marketVerdict" hidden></div>
+          <div class="market__rows" id="marketRows"></div>
+          <div class="market__list" id="marketList"></div>
+        </div>
+      </aside>
+    </div>
+
+    <section class="kobra" id="kobra">
+      <span class="spec">Racional · calculadora simples</span>
+      <h2 class="mt-8">Cores a mais na Kobra X</h2>
+      <p class="kobra__lead">O preço desta ficha usa o tempo e os gramas que você preenche. A conta abaixo é a da calculadora simples: o perfil do MakerWorld entra como 1 cor, e cada cor a mais soma troca, purga e torre por cima.</p>
+
+      <h3>De onde saem os números</h3>
+      <p>O exemplo é o teste do Clearance Castle na Kobra X, publicado pela Tom's Hardware, com os mesmos ajustes usados na Bambu A1. Foram 4 cores, 776 trocas, 35 segundos da faca até o fim da purga, 150 g de filamento expelido e 42 g na torre. O trabalho todo durou 13 h 10 min.</p>
+      <div class="kobra-facts" id="kobraFacts"></div>
+
+      <h3>Como a troca vira tempo e gramas</h3>
+      <ol>
+        <li>Tempo só das trocas no teste = 776 × 35 s. Isso sai do relógio total e sobra o tempo em que a máquina imprimia o modelo.</li>
+        <li>O teste tem 3 cores além da primeira. Trocas por hora de modelo, por cor extra = 776 ÷ 3 ÷ tempo do modelo.</li>
+        <li>Nesta peça, trocas = (cores − 1) × essa taxa × horas do modelo. As horas são as que estão em “horas” e “minutos”, de uma prancha. A calibragem de 20 min não entra nessa base e não se repete por cor.</li>
+        <li>Tempo a mais = trocas × 35 s. Esse tempo paga depreciação (R$ 0,60/h) e luz (R$ 1,00/h).</li>
+        <li>Gramas a mais = trocas × (150 g + 42 g) ÷ 776. Os 150 g são a purga. Os 42 g são a torre. Os dois viajam juntos porque, no teste, a torre também foi resíduo da troca. Essas gramas entram no preço do filamento (R$/kg desta ficha).</li>
+        <li>Filamento extra + máquina extra recebem a folga de 15%. Chaveiro (R$ 0,40) e NFC (R$ 0,25) somam no custo, fora dessa folga. O preço simples é esse custo × 2.</li>
+        <li>Pintado à mão não usa troca nem purga. É o preço de 1 cor, já no × 2, mais 30%.</li>
+      </ol>
+
+      <h3>Nesta peça</h3>
+      <p id="kobraPiece"></p>
+      <div class="kobra-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Conta</th>
+              <th>2 cores</th>
+              <th>3 cores</th>
+              <th>4 cores</th>
+            </tr>
+          </thead>
+          <tbody id="kobraRows"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</main>
+
+<dialog class="sheet-setup" id="sheetSetup">
+  <div class="sheet-setup__body">
+    <h3>Ligar a planilha uma vez</h3>
+    <p>O botão grava cada parte na planilha <a href="https://docs.google.com/spreadsheets/d/1zTLYjV0DHYYG1OI36FdBoEgLok5eLnPc9nVRxm9NdCQ/edit?usp=sharing" target="_blank" rel="noopener">Projetos</a>. É um passo só, no Google.</p>
+    <ol>
+      <li>Abra a planilha → <b>Extensões → Apps Script</b>.</li>
+      <li>Apague o código que aparecer e cole o script da Minted.</li>
+      <li><b>Implantar → Nova implantação → Aplicativo da web</b>.</li>
+      <li>Executar como <b>eu</b>. Quem tem acesso: <b>Qualquer pessoa</b>.</li>
+      <li>Copie a URL da implantação e cole abaixo.</li>
+    </ol>
+    <div class="sheet-setup__actions">
+      <button type="button" class="btn btn--dark btn--sm" id="copyScriptBtn">Copiar script</button>
+      <a class="btn btn--line btn--sm" href="https://docs.google.com/spreadsheets/d/1zTLYjV0DHYYG1OI36FdBoEgLok5eLnPc9nVRxm9NdCQ/edit?usp=sharing" target="_blank" rel="noopener">Abrir planilha</a>
+    </div>
+    <div class="field" style="margin-top:16px">
+      <label for="webappUrl">URL do aplicativo da web</label>
+      <input class="url" type="url" id="webappUrl" placeholder="https://script.google.com/macros/s/…/exec" spellcheck="false" />
+    </div>
+    <div class="sheet-setup__actions">
+      <button type="button" class="btn btn--mint" id="saveWebappBtn">Salvar e confirmar</button>
+      <button type="button" class="btn btn--line" id="closeSetupBtn">Agora não</button>
+    </div>
+    <p class="hint" id="setupHint"></p>
+  </div>
+</dialog>
+
+<script>
+(function () {
+  const DEPRECIATION_PER_H = 3000 / 5000;
+  const ENERGY_PER_H = 1;
+  const CALIBRATION_MIN = 20;
+  const CALIBRATION_H = CALIBRATION_MIN / 60;
+  const ERROR = 0.15;
+  const MARGIN_STD = 0.70;
+  const MARGIN_CUSTOM = 1.20;
+  const MARGIN_PERSONAL = 0.20;
+  const NEGO_STD = 0.15;
+  const NEGO_MAX = 0.25;
+  const PAINT_MULT = 2;
+  const PRINTER_ASSET = 3000;
+  const RING_PACK_N = 100;
+  const RING_PACK_PRICE = 40;
+  const RING_UNIT = RING_PACK_PRICE / RING_PACK_N;
+  const NFC_PACK_N = 100;
+  const NFC_PACK_PRICE = 25;
+  const NFC_UNIT = NFC_PACK_PRICE / NFC_PACK_N;
+  const KG_KEY = 'minted.calc.precoKg';
+  const LOCO_KEY = 'minted.calc.locoPct';
+  const LOCO_DEFAULT = 0.05;
+
+  const FINISH = {
+    '1cor': { label: '1 cor', hint: 'Preço normal, com margem.' },
+    '2cores': { label: '2 cores', hint: 'Preço normal — o tempo e os gramas já entram no custo.' },
+    'pintado': { label: 'Pintado à mão', hint: 'O preço com margem é multiplicado por 2.' }
+  };
+
+  const PACKAGING = {
+    kraft: {
+      label: 'Kraft',
+      hint: 'Saquinho kraft 8×12 cm. R$ 15,00 / 100 un · R$ 0,15 / un.',
+      packN: 100,
+      packPrice: 15
+    },
+    plastico: {
+      label: 'Plástico',
+      hint: 'Zip lock 6×8,5 cm. R$ 7,00 / 100 un · R$ 0,07 / un.',
+      packN: 100,
+      packPrice: 7
+    },
+    organza: {
+      label: 'Organza',
+      hint: 'Saquinho organza 7×9 cm. R$ 25,00 / 100 un · R$ 0,25 / un.',
+      packN: 100,
+      packPrice: 25
+    },
+    caixa: {
+      label: 'Caixinha kraft',
+      hint: 'Caixa kraft 6×6 cm. R$ 60,00 / 100 un · R$ 0,60 / un.',
+      packN: 100,
+      packPrice: 60
+    }
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const projeto = $('projeto');
+  const unidades = $('unidades');
+  const horas = $('horas');
+  const minutos = $('minutos');
+  const minField = $('minField');
+  const minWarn = $('minWarn');
+  const gramas = $('gramas');
+  const precoKg = $('precoKg');
+  const btnCustom = $('btnCustom');
+  const margemInput = $('margemInput');
+  const quote = $('quote');
+  const finishBtns = [...document.querySelectorAll('[data-finish]')];
+  const modeBtns = [...document.querySelectorAll('[data-mode]')];
+  const ringBtns = [...document.querySelectorAll('[data-ring]')];
+  const nfcBtns = [...document.querySelectorAll('[data-nfc]')];
+  const packedBtns = [...document.querySelectorAll('[data-packed]')];
+  const packBtns = [...document.querySelectorAll('[data-pack]')];
+
+  let custom = false;
+  let finish = '1cor';
+  let mode = 'simple';
+  let withRing = false;
+  let withNfc = false;
+  let packed = false;
+  let packType = 'kraft';
+  let last = null;
+  let hush = false;
+  let parts = [emptyPart()];
+  let partIndex = 0;
+  let mwData = null;
+  let marketData = null;
+  const SHEET_ID = '1zTLYjV0DHYYG1OI36FdBoEgLok5eLnPc9nVRxm9NdCQ';
+  const SHEET_URL = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/edit?usp=sharing';
+  const WEBAPP_KEY = 'minted.calc.sheetWebhook';
+  const GAS_URL = '';
+  const FORM_NAME = 'minted-projetos';
+  const FIELD_KEYS = [
+    'data', 'projeto', 'link', 'parte', 'nParte', 'modo', 'unidades',
+    'tempoH', 'tempo', 'calibragemMin', 'pesoG', 'filamentoKg', 'acabamento',
+    'personalizado', 'argola', 'nfc', 'embalagem', 'custoFilamento',
+    'custoDepreciacao', 'custoEnergia', 'custoErro', 'custoExtras', 'custo',
+    'margemPct', 'margemReais', 'pinturaExtra', 'preco', 'precoUn', 'lucro',
+    'negoOk', 'negoPiso', 'roi', 'ros', 'markup'
+  ];
+  const MODE_LABEL = { simple: 'Simples', advanced: 'Avançada', personal: 'Proj. pessoais' };
+
+  function emptyPart() {
+    return {
+      name: '',
+      unidades: '1',
+      horas: '',
+      minutos: '',
+      gramas: '',
+      finish: '1cor',
+      custom: false,
+      withRing: false,
+      withNfc: false,
+      packed: false,
+      packType: 'kraft',
+      margem: '',
+      confirmed: false,
+      confirmedAt: null,
+      snapshot: null
+    };
+  }
+
+  const money = (n) => n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  const parseMoney = (raw) => {
+    let s = String(raw || '').trim().replace(/\s/g, '').replace(/R\$/gi, '').replace(/\/kg/i, '');
+    if (!s) return 0;
+    if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
+    const n = parseFloat(s);
+    return Number.isFinite(n) ? n : 0;
+  };
+  const parseNum = (raw) => {
+    const n = parseFloat(String(raw || '').replace(/[^\d,.-]/g, '').replace(',', '.'));
+    return Number.isFinite(n) && n > 0 ? n : 0;
+  };
+  const fmtHours = (h) => {
+    const totalMin = Math.round(h * 60);
+    const hh = Math.floor(totalMin / 60);
+    const mm = totalMin % 60;
+    if (hh && mm) return hh + ' h ' + mm + ' min';
+    if (hh) return hh + ' h';
+    return mm + ' min';
+  };
+  const fmtGrams = (g) => {
+    const n = Math.round(g * 10) / 10;
+    return n.toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + ' g';
+  };
+  const titleCase = (s) => s.replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+  const escapeHtml = (s) => String(s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+  function parseProject(raw) {
+    const trimmed = String(raw || '').trim();
+    if (!trimmed) return { name: '', url: '', display: '' };
+    let href = trimmed;
+    if (!/^https?:\/\//i.test(href)) href = 'https://' + href.replace(/^\/+/, '');
+    let name = '';
+    try {
+      const u = new URL(href);
+      const path = decodeURIComponent(u.pathname);
+      const m = path.match(/\/models\/(\d+)(?:-([^/?#]+))?/i);
+      if (m) name = m[2] ? titleCase(m[2].replace(/[-_]+/g, ' ').trim()) : ('Modelo ' + m[1]);
+      else {
+        const lastSeg = path.split('/').filter(Boolean).pop() || '';
+        if (lastSeg && lastSeg !== 'models') name = titleCase(lastSeg.replace(/[-_]+/g, ' '));
+      }
+      href = u.toString();
+    } catch { name = trimmed; }
+    return { name, url: href, display: name || href };
+  }
+
+  function setCustom(on) {
+    if (mode === 'personal') return;
+    custom = on;
+    btnCustom.setAttribute('aria-pressed', on ? 'true' : 'false');
+    if (mode === 'advanced') {
+      margemInput.value = on ? '100' : '70';
+      $('customHint').textContent = on ? 'Margem preenchida com 100%. Ajuste na barra abaixo.' : 'Preenche a margem com 100%.';
+    } else {
+      $('customHint').textContent = on ? 'Margem 120%.' : 'Margem 70%. Toque para 120%.';
+    }
+    syncMarginLabel();
+    compute();
+  }
+
+  function setFinish(key) {
+    finish = key;
+    finishBtns.forEach((b) => b.setAttribute('aria-pressed', b.dataset.finish === key ? 'true' : 'false'));
+    $('finishHint').textContent = FINISH[key].hint;
+    compute();
+  }
+
+  function setMode(next) {
+    mode = next;
+    const extrasOn = next !== 'simple';
+    const isPers = next === 'personal';
+    modeBtns.forEach((b) => b.setAttribute('aria-pressed', b.dataset.mode === next ? 'true' : 'false'));
+    $('advancedPanel').classList.toggle('is-on', extrasOn);
+    $('assAsset').hidden = !extrasOn;
+    $('customField').hidden = isPers;
+    $('marginField').hidden = next !== 'advanced';
+    if (next === 'advanced' && !String(margemInput.value || '').trim()) {
+      margemInput.value = custom ? '100' : '70';
+    }
+    $('faixa').hidden = isPers;
+    $('faixaNota').hidden = isPers;
+    $('negoRow').hidden = isPers;
+    $('rangeTitle').textContent = isPers ? 'Composição do preço' : 'Faixa de negociação';
+
+    if (isPers) {
+      custom = false;
+      btnCustom.setAttribute('aria-pressed', 'false');
+      $('customHint').textContent = 'Margem 70%. Toque para 120%.';
+      $('assMargem').textContent = '20%';
+      $('introSpec').textContent = 'Calculadora Proj. Pessoais';
+      $('modeHint').textContent = 'Margem fixa de 20%. Argola, NFC e embalagem iguais. Sem negociação.';
+      $('introLead').textContent = 'Mesmos dados da avançada, com margem de 20%. O preço a pedir é o preço — sem faixa de desconto.';
+      document.title = 'Calculadora Proj. Pessoais · uso interno | Minted';
+    } else if (extrasOn) {
+      syncMarginLabel();
+      $('customHint').textContent = custom ? 'Margem preenchida com 100%. Ajuste na barra abaixo.' : 'Preenche a margem com 100%.';
+      $('introSpec').textContent = 'Ficha de custo';
+      $('modeHint').textContent = 'Margem livre, argola, NFC, embalagem e análise de ROI / ROA entram no pedido.';
+      $('introLead').textContent = 'Mesma ficha, com argola, NFC, embalagem e a leitura financeira do pedido.';
+      document.title = 'Ficha de custo · uso interno | Minted';
+    } else {
+      $('assMargem').textContent = custom ? '120%' : '70%';
+      $('customHint').textContent = custom ? 'Margem 120%.' : 'Margem 70%. Toque para 120%.';
+      $('introSpec').textContent = 'Ficha de custo';
+      $('modeHint').textContent = 'Impressão, filamento e margem. Sem argola, NFC ou embalagem.';
+      $('introLead').textContent = 'Link, tempo, gramas totais e quantas peças na prancha. O resumo já sai pronto para o WhatsApp.';
+      document.title = 'Ficha de custo · uso interno | Minted';
+    }
+
+    if (!extrasOn) {
+      setRing(false, true);
+      setNfc(false, true);
+      setPacked(false, true);
+    }
+    const hash = next === 'personal' ? 'pessoais' : (next === 'advanced' ? 'avancada' : 'simples');
+    if ((location.hash || '').replace(/^#/, '') !== hash) {
+      history.replaceState(null, '', '#' + hash);
+    }
+    compute();
+  }
+
+  function setRing(on, silent) {
+    withRing = on;
+    ringBtns.forEach((b) => b.setAttribute('aria-pressed', (b.dataset.ring === 'sim') === on ? 'true' : 'false'));
+    $('assRing').hidden = !on;
+    if (!silent) compute();
+  }
+
+  function setNfc(on, silent) {
+    withNfc = on;
+    nfcBtns.forEach((b) => b.setAttribute('aria-pressed', (b.dataset.nfc === 'sim') === on ? 'true' : 'false'));
+    $('assNfc').hidden = !on;
+    if (!silent) compute();
+  }
+
+  function setPacked(on, silent) {
+    packed = on;
+    packedBtns.forEach((b) => b.setAttribute('aria-pressed', (b.dataset.packed === 'sim') === on ? 'true' : 'false'));
+    $('packPanel').classList.toggle('is-on', on);
+    $('assPack').hidden = !on;
+    $('packHint').textContent = on
+      ? 'Escolha o material. O custo entra por unidade da prancha.'
+      : 'Sem embalagem no custo.';
+    if (on) setPack(packType, true);
+    if (!silent) compute();
+  }
+
+  function setPack(key, silent) {
+    packType = key;
+    packBtns.forEach((b) => b.setAttribute('aria-pressed', b.dataset.pack === key ? 'true' : 'false'));
+    const p = PACKAGING[key];
+    $('packTypeHint').textContent = p.hint;
+    $('assPackVal').textContent = money(p.packPrice) + ' / ' + p.packN + ' un';
+    if (!silent) compute();
+  }
+
+  const pct = (n) => (n * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + '%';
+  const packUnit = (key) => PACKAGING[key].packPrice / PACKAGING[key].packN;
+  const pctLabel = (r) => (r * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + '%';
+
+  function currentMargin() {
+    if (mode === 'personal') return MARGIN_PERSONAL;
+    if (mode === 'advanced') {
+      const raw = String(margemInput.value || '').trim();
+      if (raw) {
+        const n = parseFloat(raw.replace(/[^\d,.-]/g, '').replace(',', '.'));
+        if (Number.isFinite(n) && n >= 0) return n / 100;
+      }
+    }
+    return custom ? MARGIN_CUSTOM : MARGIN_STD;
+  }
+
+  function syncMarginLabel() {
+    const rate = currentMargin();
+    $('assMargem').textContent = pctLabel(rate);
+    const min = Number(margemInput.min) || 0;
+    const max = Number(margemInput.max) || 200;
+    const val = Math.min(max, Math.max(min, Number(margemInput.value) || 0));
+    margemInput.style.setProperty('--fill', ((val - min) / (max - min) * 100) + '%');
+    const out = $('margemOut');
+    if (out) out.querySelector('b').textContent = pctLabel(mode === 'advanced' ? val / 100 : rate);
+  }
+
+  function syncMarginPrice(d) {
+    const el = $('margemPreco');
+    if (!el) return;
+    el.textContent = d ? money(d.price) + (d.units > 1 ? ' · ' + money(d.price / d.units) + ' a unidade' : '') : '';
+  }
+
+  function partLabel(i, p) {
+    const name = (p && p.name || '').trim();
+    return name || ('Parte ' + (i + 1));
+  }
+
+  function saveCurrentPart() {
+    const p = parts[partIndex];
+    if (!p) return;
+    p.name = ($('parteNome').value || '').trim();
+    p.unidades = unidades.value;
+    p.horas = horas.value;
+    p.minutos = minutos.value;
+    p.gramas = gramas.value;
+    p.finish = finish;
+    p.custom = custom;
+    p.withRing = withRing;
+    p.withNfc = withNfc;
+    p.packed = packed;
+    p.packType = packType;
+    p.margem = margemInput.value;
+    if (last) p.snapshot = last;
+  }
+
+  function loadPart(i) {
+    const p = parts[i];
+    if (!p) return;
+    hush = true;
+    partIndex = i;
+    $('parteNome').value = p.name || '';
+    unidades.value = p.unidades || '1';
+    horas.value = p.horas || '';
+    minutos.value = p.minutos || '';
+    gramas.value = p.gramas || '';
+    setFinish(p.finish || '1cor');
+    setCustom(!!p.custom);
+    if (p.margem) margemInput.value = p.margem;
+    syncMarginLabel();
+    setRing(!!p.withRing, true);
+    setNfc(!!p.withNfc, true);
+    setPacked(!!p.packed, true);
+    setPack(p.packType || 'kraft', true);
+    hush = false;
+    compute();
+    renderPartsBar();
+  }
+
+  function addPart() {
+    saveCurrentPart();
+    parts.push(emptyPart());
+    loadPart(parts.length - 1);
+  }
+
+  function renderPartsBar() {
+    const bar = $('partsBar');
+    if (!bar) return;
+    bar.innerHTML = parts.map((p, i) => {
+      const cls = 'part-chip'
+        + (i === partIndex ? ' is-on' : '')
+        + (p.confirmed ? ' is-saved' : '');
+      const mark = p.confirmed ? ' ✓' : '';
+      return '<button type="button" class="' + cls + '" data-part="' + i + '">'
+        + escapeHtml(partLabel(i, p)) + mark + '</button>';
+    }).join('') + '<button type="button" class="part-add" id="addPartBtn">+ Parte</button>';
+    bar.querySelectorAll('[data-part]').forEach((b) => {
+      b.addEventListener('click', () => {
+        const i = Number(b.dataset.part);
+        if (i === partIndex) return;
+        saveCurrentPart();
+        loadPart(i);
+      });
+    });
+    $('addPartBtn').addEventListener('click', addPart);
+    const kicker = $('quoteKicker');
+    if (kicker) kicker.textContent = parts.length > 1 ? partLabel(partIndex, parts[partIndex]) : 'Resultado';
+    const confirmBtn = $('confirmBtn');
+    if (confirmBtn) {
+      confirmBtn.classList.toggle('is-saved', !!(parts[partIndex] && parts[partIndex].confirmed));
+      confirmBtn.textContent = (parts[partIndex] && parts[partIndex].confirmed)
+        ? 'Confirmado na planilha'
+        : 'Confirmar para Banco de Dados';
+    }
+    renderProjectTotal();
+  }
+
+  function renderProjectTotal() {
+    const el = $('projectTotal');
+    if (!el) return;
+    const priced = parts.filter((p) => p.snapshot && p.snapshot.price);
+    if (priced.length < 2) {
+      el.classList.remove('is-on');
+      el.innerHTML = '';
+      return;
+    }
+    const cost = priced.reduce((s, p) => s + (p.snapshot.cost || 0), 0);
+    const price = priced.reduce((s, p) => s + (p.snapshot.price || 0), 0);
+    el.classList.add('is-on');
+    el.innerHTML = '<span>Total do projeto · ' + priced.length + ' partes</span>'
+      + '<b>' + money(price) + '</b>'
+      + '<p class="per-unit">Custo ' + money(cost) + ' · lucro ' + money(price - cost) + '</p>';
+  }
+
+  function webappUrl() {
+    try { return (localStorage.getItem(WEBAPP_KEY) || '').trim(); } catch { return ''; }
+  }
+
+  function setWebappUrl(url) {
+    try { localStorage.setItem(WEBAPP_KEY, url); } catch (_) {}
+  }
+
+  function round2(n) {
+    return Math.round((Number(n) || 0) * 100) / 100;
+  }
+
+  function buildSheetFields(d) {
+    const p = parts[partIndex] || emptyPart();
+    const extrasOn = !!d.advanced;
+    const marginRate = d.marginRate;
+    return {
+      data: new Date().toLocaleString('pt-BR'),
+      projeto: d.project.name || d.project.display || (projeto.value || '').trim() || '—',
+      link: d.project.url || '',
+      parte: partLabel(partIndex, p),
+      nParte: partIndex + 1,
+      modo: MODE_LABEL[mode] || mode,
+      unidades: d.units,
+      tempoH: round2(d.printH),
+      tempo: fmtHours(d.printH),
+      calibragemMin: CALIBRATION_MIN,
+      pesoG: d.grams,
+      filamentoKg: parseMoney(precoKg.value),
+      acabamento: FINISH[d.finish] ? FINISH[d.finish].label : d.finish,
+      personalizado: d.custom ? 'Sim' : 'Não',
+      argola: extrasOn && d.withRing ? round2(d.ringCost) : 0,
+      nfc: extrasOn && d.withNfc ? round2(d.nfcCost) : 0,
+      embalagem: extrasOn && d.packed ? ((PACKAGING[d.packType] || {}).label || '') : '',
+      custoFilamento: round2(d.fil),
+      custoDepreciacao: round2(d.dep),
+      custoEnergia: round2(d.energy),
+      custoErro: round2(d.erro),
+      custoExtras: round2((d.ringCost || 0) + (d.nfcCost || 0) + (d.packCost || 0)),
+      custo: round2(d.cost),
+      margemPct: marginRate,
+      margemReais: round2((d.price || 0) - (d.paintExtra || 0) - (d.cost || 0)),
+      pinturaExtra: round2(d.paintExtra || 0),
+      preco: round2(d.price),
+      precoUn: d.units ? round2(d.price / d.units) : round2(d.price),
+      lucro: round2((d.price || 0) - (d.cost || 0)),
+      negoOk: d.personal ? '' : round2(d.floor15),
+      negoPiso: d.personal ? '' : round2(d.floor25),
+      roi: round2(d.roi * 100) / 100,
+      ros: round2(d.ros * 100) / 100,
+      markup: round2(d.markup * 100) / 100
+    };
+  }
+
+  function formBody(fields) {
+    const body = new URLSearchParams();
+    body.set('form-name', FORM_NAME);
+    body.set('bot-field', '');
+    FIELD_KEYS.forEach((k) => {
+      const v = fields[k];
+      body.set(k, v === undefined || v === null ? '' : String(v));
+    });
+    body.set('json', JSON.stringify(fields));
+    return body.toString();
+  }
+
+  // Grava direto no Apps Script da planilha e lê a resposta (ok / erro de verdade).
+  async function postConfirm(fields) {
+    const url = (window.MINTED_SHEET_URL || GAS_URL || webappUrl() || '').trim();
+    if (url) {
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ fields }),
+          redirect: 'follow'
+        });
+        const txt = await res.text();
+        let data = null;
+        try { data = JSON.parse(txt); } catch (_) {}
+        if (data && data.ok) return { ok: true, row: data.row };
+        if (data && data.error) return { ok: false, error: 'Planilha: ' + data.error };
+        if (/^OK \d+/.test(txt.trim())) return { ok: true };
+        return { ok: false, error: 'A planilha respondeu algo inesperado. Reimplante o Apps Script (Gerenciar implantações → Nova versão).' };
+      } catch (e) {
+        return { ok: false, error: 'Não consegui falar com a planilha. Confira se a implantação está com acesso "Qualquer pessoa" e é a versão mais nova do script.' };
+      }
+    }
+    // Sem planilha configurada: no servidor local (servir.py) ainda guarda uma cópia em banco-projetos.jsonl.
+    try {
+      const res = await fetch('/api/calc-confirm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (data && data.sheet) return { ok: true };
+    } catch (_) {}
+    return { ok: false, needSetup: true, error: 'Planilha não configurada.' };
+  }
+
+  function openSetup() {
+    const dlg = $('sheetSetup');
+    $('webappUrl').value = webappUrl();
+    $('setupHint').textContent = '';
+    if (typeof dlg.showModal === 'function') dlg.showModal();
+    else dlg.setAttribute('open', '');
+  }
+
+  function closeSetup() {
+    const dlg = $('sheetSetup');
+    if (typeof dlg.close === 'function') dlg.close();
+    else dlg.removeAttribute('open');
+  }
+
+  async function confirmCurrentPart() {
+    if (!last) return;
+    saveCurrentPart();
+    const fields = buildSheetFields(last);
+    const result = await postConfirm(fields);
+    if (!result.ok && result.needSetup) { openSetup(); return; }
+    if (!result.ok) {
+      $('copyOk').hidden = false;
+      $('copyOk').textContent = result.error || 'Não gravou.';
+      setTimeout(() => { $('copyOk').hidden = true; }, 9000);
+      return;
+    }
+    parts[partIndex].confirmed = true;
+    parts[partIndex].confirmedAt = new Date().toISOString();
+    parts[partIndex].snapshot = last;
+    renderPartsBar();
+    $('copyOk').hidden = false;
+    $('copyOk').textContent = result.row ? 'Gravado na planilha (linha ' + result.row + ').' : 'Gravado na planilha.';
+    setTimeout(() => { $('copyOk').hidden = true; }, 2800);
+  }
+
+  function buildWhatsApp(d) {
+    const lines = [d.personal ? '*Minted — projeto pessoal*' : '*Minted — ficha de impressão 3D*', ''];
+    lines.push('*Projeto:* ' + (d.project.name || '—'));
+    if (d.project.url) lines.push(d.project.url);
+    if (parts.length > 1 || (parts[partIndex] && parts[partIndex].name)) {
+      lines.push('*Parte:* ' + partLabel(partIndex, parts[partIndex]));
+    }
+    lines.push('');
+    if (d.personal) lines.push('*Modo:* projeto pessoal (margem 20%)');
+    lines.push('*Unidades:* ' + d.units + (d.units > 1 ? ' na prancha' : ''));
+    lines.push('*Tempo:* ' + fmtHours(d.printH) + (d.units > 1
+      ? ' (' + d.units + ' × ' + fmtHours(d.unitH) + ' + ' + pctLabel(d.locoFactor) + ' locomoção)'
+      : ''));
+    lines.push('*Calibragem:* +' + CALIBRATION_MIN + ' min' + (d.units > 1 ? ' (rateada em ' + d.units + ' un)' : ''));
+    lines.push('*Peso:* ' + fmtGrams(d.grams) + (d.units > 1 ? ' (' + d.units + ' × ' + fmtGrams(d.unitGrams) + ')' : ''));
+    if (d.custom) lines.push('*Tipo:* personalizado');
+    if (d.advanced && !d.personal) lines.push('*Margem:* ' + pctLabel(d.marginRate));
+    lines.push('*Acabamento:* ' + FINISH[d.finish].label);
+    if (d.advanced) {
+      lines.push('*Argola:* ' + (d.withRing ? 'sim (' + money(d.ringCost) + ')' : 'não'));
+      lines.push('*NFC:* ' + (d.withNfc ? 'sim (' + money(d.nfcCost) + ')' : 'não'));
+      lines.push('*Embalagem:* ' + (d.packed ? PACKAGING[d.packType].label + ' (' + money(d.packCost) + ')' : 'não'));
+    }
+    lines.push('');
+    lines.push('*Custo estimado:* ' + money(d.cost));
+    lines.push('*Preço a pedir:* ' + money(d.price));
+    if (d.units > 1) lines.push('*Por unidade:* ' + money(d.price / d.units));
+    if (!d.personal) lines.push('*Negociação:* ' + money(d.floor15) + ' — ' + money(d.price));
+    if (d.advanced) {
+      lines.push('');
+      lines.push('*ROI:* ' + pct(d.roi) + '  ·  *ROA:* ' + pct(d.roa));
+      lines.push('*Margem / ROS:* ' + pct(d.ros) + '  ·  *Markup:* ' + pct(d.markup));
+    }
+    return lines.join('\n');
+  }
+
+  function renderPreview(d) {
+    const name = d.project.name || '—';
+    const link = d.project.url
+      ? '<a href="' + escapeHtml(d.project.url) + '" target="_blank" rel="noopener">' + escapeHtml(d.project.url) + '</a>'
+      : '';
+    const extra = d.units > 1
+      ? '<div><span class="k">Por unidade</span><span class="v">' + escapeHtml(money(d.price / d.units)) + '</span></div>'
+      : '';
+    $('waPreview').innerHTML =
+      '<span class="k">Projeto</span><span class="v">' + escapeHtml(name) + '</span>' + link +
+      '<div class="pair">' +
+        '<div><span class="k">Unidades</span><span class="v">' + d.units + '</span></div>' +
+        '<div><span class="k">Tempo</span><span class="v">' + escapeHtml(fmtHours(d.printH)) + '</span></div>' +
+        '<div><span class="k">Calibragem</span><span class="v">+' + CALIBRATION_MIN + ' min' + (d.units > 1 ? ' / ' + d.units : '') + '</span></div>' +
+        '<div><span class="k">Peso total</span><span class="v">' + escapeHtml(fmtGrams(d.grams)) + '</span></div>' +
+        '<div><span class="k">Acabamento</span><span class="v">' + escapeHtml(FINISH[d.finish].label) + '</span></div>' +
+        (d.personal
+          ? '<div><span class="k">Modo</span><span class="v">Proj. pessoais · 20%</span></div>'
+          : '') +
+        (d.advanced
+          ? '<div><span class="k">Argola</span><span class="v">' + (d.withRing ? 'Sim' : 'Não') + '</span></div>' +
+            '<div><span class="k">NFC</span><span class="v">' + (d.withNfc ? 'Sim' : 'Não') + '</span></div>' +
+            '<div><span class="k">Embalagem</span><span class="v">' + (d.packed ? escapeHtml(PACKAGING[d.packType].label) : 'Não') + '</span></div>'
+          : '') +
+        '<div><span class="k">Custo estimado</span><span class="v">' + escapeHtml(money(d.cost)) + '</span></div>' +
+        extra +
+      '</div>' +
+      '<div class="ask"><small>Preço a pedir</small>' + escapeHtml(money(d.price)) + '</div>';
+  }
+
+  const KOBRA_SWAP_S = 35;
+  const KOBRA_SWAPS = 776;
+  const KOBRA_PURGE_G = 150;
+  const KOBRA_TOWER_G = 42;
+  const KOBRA_TOTAL_H = 13 + 10 / 60;
+  const KOBRA_SWAP_H = KOBRA_SWAPS * KOBRA_SWAP_S / 3600;
+  const KOBRA_MODEL_H = KOBRA_TOTAL_H - KOBRA_SWAP_H;
+  const KOBRA_PER_H = KOBRA_SWAPS / 3 / KOBRA_MODEL_H;
+  const KOBRA_WASTE_G = (KOBRA_PURGE_G + KOBRA_TOWER_G) / KOBRA_SWAPS;
+  const KOBRA_MACHINE_H = DEPRECIATION_PER_H + ENERGY_PER_H;
+
+  function kobraNum(n, digits) {
+    return n.toLocaleString('pt-BR', { minimumFractionDigits: digits, maximumFractionDigits: digits });
+  }
+
+  function renderKobra(modelH, kgPrice) {
+    const facts = $('kobraFacts');
+    if (!facts) return;
+    const kg = kgPrice > 0 ? kgPrice : 100;
+    const kgFallback = kgPrice > 0 ? '' : ' A ficha está sem R$/kg, então a tabela usa R$ 100/kg.';
+    facts.innerHTML = [
+      ['Trocas no teste', String(KOBRA_SWAPS)],
+      ['Cada troca', KOBRA_SWAP_S + ' s'],
+      ['Purga + torre', kobraNum(KOBRA_WASTE_G, 3) + ' g'],
+      ['Por cor extra', kobraNum(KOBRA_PER_H, 1) + ' trocas/h']
+    ].map((pair) => '<div><span>' + pair[0] + '</span><b>' + pair[1] + '</b></div>').join('');
+
+    const note = $('kobraPiece');
+    const rows = $('kobraRows');
+    if (!(modelH > 0)) {
+      note.textContent = 'Preencha horas ou minutos. Sem tempo de modelo a troca fica em zero, e a purga acompanha a troca — não os gramas da peça.';
+      rows.innerHTML = '';
+      return;
+    }
+    note.textContent = 'Tempo de modelo desta prancha: ' + fmtHours(modelH) + '. Filamento a ' + money(kg) + '/kg. '
+      + 'No teste, as trocas ocuparam ' + fmtHours(KOBRA_SWAP_H) + ' e o modelo ficou com ' + fmtHours(KOBRA_MODEL_H) + '.'
+      + kgFallback;
+
+    function col(colors) {
+      const swaps = (colors - 1) * KOBRA_PER_H * modelH;
+      const extraH = swaps * KOBRA_SWAP_S / 3600;
+      const extraG = swaps * KOBRA_WASTE_G;
+      const fil = (extraG / 1000) * kg;
+      const machine = KOBRA_MACHINE_H * extraH;
+      const erro = (fil + machine) * ERROR;
+      const extraCost = fil + machine + erro;
+      return {
+        swaps: kobraNum(swaps, 1),
+        extraH: fmtHours(extraH),
+        extraG: fmtGrams(extraG),
+        fil: money(fil),
+        machine: money(machine),
+        erro: money(erro),
+        extraCost: money(extraCost),
+        price: money(extraCost * 2)
+      };
+    }
+    const labels = [
+      ['Trocas', 'swaps'],
+      ['Tempo a mais', 'extraH'],
+      ['Purga + torre', 'extraG'],
+      ['Filamento dessa purga', 'fil'],
+      ['Depreciação + luz', 'machine'],
+      ['Folga de 15%', 'erro'],
+      ['Custo extra', 'extraCost'],
+      ['No preço simples (× 2)', 'price']
+    ];
+    const cols = [2, 3, 4].map(col);
+    rows.innerHTML = labels.map((lab, i) => {
+      const last = i >= labels.length - 2 ? ' class="is-total"' : '';
+      return '<tr' + last + '><td>' + lab[0] + '</td>' + cols.map((c) => '<td>' + c[lab[1]] + '</td>').join('') + '</tr>';
+    }).join('');
+  }
+
+  function compute() {
+    if (hush) return;
+    const project = parseProject(projeto.value);
+    $('projectName').textContent = (mwData && mwData.title) ? mwData.title : project.name;
+
+    const h = parseNum(horas.value);
+    const m = parseNum(minutos.value);
+    const extraH = Math.floor(m / 60);
+    minField.classList.toggle('is-warn', extraH >= 1);
+    if (extraH >= 1) {
+      minWarn.hidden = false;
+      minWarn.classList.add('is-on');
+      minWarn.textContent = extraH === 1
+        ? m + ' min. Deseja adicionar +1 h?'
+        : m + ' min. Deseja adicionar +' + extraH + ' h?';
+    } else {
+      minWarn.hidden = true;
+      minWarn.classList.remove('is-on');
+      minWarn.textContent = '';
+    }
+
+    const units = Math.max(1, Math.round(parseNum(unidades.value) || 1));
+    $('assCalib').textContent = units > 1
+      ? '+ 20 min · rateada em ' + units + ' un'
+      : '+ 20 min · 1 un';
+
+    const unitH = h + m / 60;
+    const unitGrams = parseNum(gramas.value);
+    const locoRaw = String($('locoPct').value || '').trim();
+    const locoParsed = parseFloat(locoRaw.replace(/[^\d,.-]/g, '').replace(',', '.'));
+    const locoRate = locoRaw && Number.isFinite(locoParsed) && locoParsed >= 0 ? locoParsed / 100 : LOCO_DEFAULT;
+    const baseH = unitH * units;
+    const locoFactor = locoRate * (units - 1);
+    const locoH = baseH * locoFactor;
+    const grams = unitGrams * units;
+    $('locoHint').textContent = units > 1 && unitH > 0
+      ? units + ' un × ' + fmtHours(unitH) + ' = ' + fmtHours(baseH) + ' + ' + pctLabel(locoFactor) + ' de locomoção (' + fmtHours(locoH) + ').'
+      : 'Tempo extra do bico viajando entre as peças. Soma essa % ao tempo a cada unidade além da primeira.';
+    const kgPrice = parseMoney(precoKg.value);
+    renderKobra(unitH, kgPrice);
+    const fil = (grams / 1000) * kgPrice;
+    const ready = h > 0 || m > 0 || grams > 0;
+    quote.dataset.ready = ready ? 'true' : 'false';
+    const extrasOn = mode !== 'simple';
+    const isPers = mode === 'personal';
+    $('analysis').classList.toggle('is-on', ready && extrasOn);
+    if (!ready) { last = null; syncMarginPrice(null); renderPartsBar(); renderMarketVerdict(); return; }
+
+    try { localStorage.setItem(KG_KEY, precoKg.value.trim()); } catch (_) {}
+    try { localStorage.setItem(LOCO_KEY, $('locoPct').value.trim()); } catch (_) {}
+
+    const printH = baseH + locoH;
+    const machineH = printH + CALIBRATION_H;
+    const dep = DEPRECIATION_PER_H * machineH;
+    const energy = ENERGY_PER_H * machineH;
+    const costRaw = fil + dep + energy;
+    const erro = costRaw * ERROR;
+    const printCost = costRaw + erro;
+    const ringCost = (extrasOn && withRing) ? RING_UNIT * units : 0;
+    const nfcCost = (extrasOn && withNfc) ? NFC_UNIT * units : 0;
+    const packCost = (extrasOn && packed) ? packUnit(packType) * units : 0;
+    const extras = ringCost + nfcCost + packCost;
+    const cost = printCost + extras;
+    const marginRate = currentMargin();
+    const pricedPrint = printCost * (1 + marginRate);
+    const pricedExtras = extras * (1 + marginRate);
+    const painted = finish === 'pintado';
+    const paintExtra = painted ? pricedPrint * (PAINT_MULT - 1) : 0;
+    const price = (painted ? pricedPrint * PAINT_MULT : pricedPrint) + pricedExtras;
+    const marginReais = (pricedPrint + pricedExtras) - cost;
+    const lucro = price - cost;
+    const floor15 = price * (1 - NEGO_STD);
+    const floor25 = price * (1 - NEGO_MAX);
+    const roi = cost > 0 ? lucro / cost : 0;
+    const roa = PRINTER_ASSET > 0 ? lucro / PRINTER_ASSET : 0;
+    const ros = price > 0 ? lucro / price : 0;
+    const markup = cost > 0 ? (price / cost) - 1 : 0;
+    const lucroH = machineH > 0 ? lucro / machineH : 0;
+    const cmv = price > 0 ? cost / price : 0;
+    const paybackJobs = lucro > 0 ? PRINTER_ASSET / lucro : Infinity;
+    const paybackH = lucroH > 0 ? PRINTER_ASSET / lucroH : Infinity;
+
+    last = {
+      project, units, printH, grams, finish, custom, cost, price, floor15, floor25,
+      advanced: extrasOn, personal: isPers, withRing, withNfc, packed, packType,
+      ringCost, nfcCost, packCost, roi, roa, ros, markup, marginRate,
+      unitH, unitGrams, locoH, locoFactor,
+      fil, dep, energy, erro, paintExtra, lucro
+    };
+    const cur = parts[partIndex];
+    if (cur && cur.confirmed && cur.snapshot) {
+      const prev = cur.snapshot;
+      if (prev.price !== last.price || prev.cost !== last.cost || prev.units !== last.units || prev.grams !== last.grams) {
+        cur.confirmed = false;
+      }
+    }
+    if (cur) cur.snapshot = last;
+
+    syncMarginPrice(last);
+    $('precoPedir').textContent = money(price);
+    $('perUnit').textContent = units > 1
+      ? money(price / units) + ' / un · ' + units + ' na prancha'
+      : '';
+    $('faixa').textContent = money(floor15) + ' — ' + money(price);
+    $('faixaNota').textContent = 'Até 15% de folga. Piso se ceder mais: ' + money(floor25) + '.';
+    $('outProjeto').textContent = project.display || '—';
+    $('outUn').textContent = String(units);
+    $('outTempo').textContent = units > 1
+      ? fmtHours(printH) + ' (' + units + ' × ' + fmtHours(unitH) + ' + loc.)'
+      : fmtHours(printH);
+    $('rowLoco').hidden = !(units > 1 && locoH > 0);
+    $('outLocoLabel').textContent = 'Locomoção · ' + pctLabel(locoFactor);
+    $('outLoco').textContent = '+ ' + fmtHours(locoH);
+    $('outCalib').textContent = units > 1
+      ? '+20 min · ' + (CALIBRATION_MIN / units).toFixed(1).replace('.', ',') + ' min/un'
+      : '+ 20 min';
+    $('outPeso').textContent = units > 1
+      ? fmtGrams(grams) + ' (' + units + ' × ' + fmtGrams(unitGrams) + ')'
+      : fmtGrams(grams);
+    $('outFilamento').textContent = money(fil);
+    $('outDep').textContent = money(dep);
+    $('outLuz').textContent = money(energy);
+    $('outErro').textContent = money(erro);
+    $('rowRing').hidden = !(extrasOn && withRing);
+    $('outRing').textContent = money(ringCost) + (units > 1 ? ' · ' + units + ' un' : '');
+    $('rowNfc').hidden = !(extrasOn && withNfc);
+    $('outNfc').textContent = money(nfcCost) + (units > 1 ? ' · ' + units + ' un' : '');
+    $('rowPack').hidden = !(extrasOn && packed);
+    $('outPackLabel').textContent = packed ? 'Embalagem · ' + PACKAGING[packType].label : 'Embalagem';
+    $('outPack').textContent = money(packCost) + (units > 1 ? ' · ' + units + ' un' : '');
+    $('outCusto').textContent = money(cost);
+    $('outMargemLabel').textContent = isPers
+      ? 'Margem 20%'
+      : (mode === 'advanced'
+        ? 'Margem ' + pctLabel(marginRate) + (custom ? ' (personalizado)' : '')
+        : (custom ? 'Margem 120% (personalizado)' : 'Margem 70%'));
+    $('outMargem').textContent = money(marginReais);
+    $('rowPaint').hidden = !painted;
+    $('outPaint').textContent = money(paintExtra);
+    $('outLucroPedir').textContent = money(lucro);
+
+    const marginStd = cost * MARGIN_STD;
+    const customExtra = custom ? cost * (MARGIN_CUSTOM - MARGIN_STD) : 0;
+    const layers = [
+      { label: 'Custo impressão', value: costRaw, color: '#1e8fbe' },
+      { label: 'Folga 15%', value: erro, color: '#3d7ea6' }
+    ];
+    if (ringCost) layers.push({ label: 'Argola', value: ringCost, color: '#c45c26' });
+    if (nfcCost) layers.push({ label: 'NFC', value: nfcCost, color: '#1aa7c4' });
+    if (packCost) layers.push({ label: PACKAGING[packType].label, value: packCost, color: '#8a6a3d' });
+    if (isPers) {
+      layers.push({ label: 'Margem 20%', value: cost * MARGIN_PERSONAL, color: '#0f9c6f' });
+    } else if (mode === 'advanced') {
+      layers.push({ label: 'Margem ' + pctLabel(marginRate), value: cost * marginRate, color: '#0f9c6f' });
+    } else {
+      layers.push({ label: 'Margem 70%', value: marginStd, color: '#0f9c6f' });
+      if (custom) layers.push({ label: 'Personalizado', value: customExtra, color: '#7c5cbf' });
+    }
+    if (painted) layers.push({ label: 'Pintura à mão', value: paintExtra, color: '#d4a017' });
+    const max = price || 1;
+    $('chart').innerHTML = layers.map((s) => {
+      const p = Math.max(8, Math.min(100, (s.value / max) * 100));
+      return '<div class="chart__row" style="--c:' + s.color + ';--p:' + p + '%">' +
+        '<span class="chart__lab">' + s.label + '</span>' +
+        '<span class="chart__val">' + money(s.value) + '</span></div>';
+    }).join('');
+    $('negoDeep').textContent = money(floor25);
+    $('negoOk').textContent = money(floor15);
+    $('negoAsk').textContent = money(price);
+
+    if (extrasOn) {
+      const fmtJobs = (n) => !Number.isFinite(n) ? '—' : (n < 10
+        ? n.toLocaleString('pt-BR', { maximumFractionDigits: 1 })
+        : Math.ceil(n).toLocaleString('pt-BR'));
+      $('kpiRoi').textContent = pct(roi);
+      $('kpiRoa').textContent = pct(roa);
+      $('kpiRos').textContent = pct(ros);
+      $('kpiMarkup').textContent = pct(markup);
+      $('kpiLucroH').textContent = machineH > 0 ? money(lucroH) + '/h' : '—';
+      $('kpiCmv').textContent = pct(cmv);
+      $('kpiPayback').textContent = lucro > 0 ? fmtJobs(paybackJobs) + ' ped.' : '—';
+      $('kpiPayH').textContent = lucroH > 0 ? fmtHours(paybackH) : '—';
+      $('kpiUnit').textContent = money(cost / units) + '  →  ' + money(price / units);
+      $('kpiUnitNote').textContent = 'custo/un · preço/un · lucro ' + money(lucro / units) + '/un';
+      const extrasBits = [];
+      if (withRing) extrasBits.push('argola');
+      if (withNfc) extrasBits.push('NFC');
+      if (packed) extrasBits.push(PACKAGING[packType].label.toLowerCase());
+      const extrasTxt = extrasBits.length
+        ? ' Adicionais neste pedido: ' + extrasBits.join(', ') + '.'
+        : '';
+      $('kpiNote').textContent = isPers
+        ? ('Margem fixa de 20%, sem faixa de negociação. ROA mede o retorno deste pedido sobre a impressora de ' + money(PRINTER_ASSET) + '.' + extrasTxt)
+        : ((roi >= 1
+          ? 'ROI alto: o pedido devolve o custo e ainda gera o mesmo tanto (ou mais) de lucro.'
+          : roi >= 0.7
+            ? 'ROI na faixa da margem padrão. Cabe negociar até 15% sem estourar o piso.'
+            : 'ROI abaixo da margem padrão — confira tempo, gramas e adicionais.') +
+          ' ROA mede o retorno deste pedido sobre a impressora de ' + money(PRINTER_ASSET) + '.' +
+          extrasTxt);
+    }
+
+    renderPreview(last);
+    renderPartsBar();
+    renderMarketVerdict();
+  }
+
+  try {
+    const saved = localStorage.getItem(KG_KEY);
+    if (saved) precoKg.value = saved;
+    const savedLoco = localStorage.getItem(LOCO_KEY);
+    if (savedLoco !== null && savedLoco !== '') $('locoPct').value = savedLoco;
+  } catch (_) {}
+
+  $('calcForm').addEventListener('submit', (e) => e.preventDefault());
+  btnCustom.addEventListener('click', () => setCustom(!custom));
+  finishBtns.forEach((b) => b.addEventListener('click', () => setFinish(b.dataset.finish)));
+  modeBtns.forEach((b) => b.addEventListener('click', () => setMode(b.dataset.mode)));
+  ringBtns.forEach((b) => b.addEventListener('click', () => setRing(b.dataset.ring === 'sim')));
+  nfcBtns.forEach((b) => b.addEventListener('click', () => setNfc(b.dataset.nfc === 'sim')));
+  packedBtns.forEach((b) => b.addEventListener('click', () => setPacked(b.dataset.packed === 'sim')));
+  packBtns.forEach((b) => b.addEventListener('click', () => setPack(b.dataset.pack)));
+
+  minWarn.addEventListener('click', () => {
+    const m = parseNum(minutos.value);
+    const extraH = Math.floor(m / 60);
+    if (extraH < 1) return;
+    horas.value = String(parseNum(horas.value) + extraH);
+    const rest = m % 60;
+    minutos.value = rest ? String(rest) : '';
+    compute();
+  });
+
+  ['input', 'change'].forEach((ev) => {
+    [projeto, unidades, horas, minutos, gramas, precoKg, margemInput, $('locoPct'), $('parteNome')].forEach((el) => el.addEventListener(ev, () => {
+      if (el === margemInput) syncMarginLabel();
+      if (el === $('parteNome')) {
+        parts[partIndex].name = ($('parteNome').value || '').trim();
+        renderPartsBar();
+        return;
+      }
+      compute();
+    }));
+  });
+
+  $('clearBtn').addEventListener('click', () => {
+    const keepProject = projeto.value;
+    parts[partIndex] = emptyPart();
+    $('parteNome').value = '';
+    unidades.value = '1';
+    horas.value = '';
+    minutos.value = '';
+    gramas.value = '';
+    $('copyOk').hidden = true;
+    setFinish('1cor');
+    setCustom(false);
+    setRing(false, true);
+    setNfc(false, true);
+    setPacked(false, true);
+    setPack('kraft', true);
+    projeto.value = keepProject;
+    compute();
+    $('parteNome').focus();
+  });
+
+  $('copyBtn').addEventListener('click', async () => {
+    if (!last) return;
+    const text = buildWhatsApp(last);
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+    }
+    $('copyOk').hidden = false;
+    $('copyOk').textContent = 'Copiado.';
+    setTimeout(() => { $('copyOk').hidden = true; }, 2200);
+  });
+
+  $('confirmBtn').addEventListener('click', async () => {
+    if (!last) return;
+    const btn = $('confirmBtn');
+    btn.disabled = true;
+    try {
+      await confirmCurrentPart();
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  $('copyScriptBtn').addEventListener('click', async () => {
+    const hint = $('setupHint');
+    try {
+      const res = await fetch('Code.gs', { cache: 'no-store' });
+      const text = await res.text();
+      await navigator.clipboard.writeText(text);
+      hint.textContent = 'Script copiado. Cole no Apps Script da planilha.';
+    } catch {
+      hint.textContent = 'Abra admin/Code.gs e copie o conteúdo manualmente.';
+    }
+  });
+
+  $('saveWebappBtn').addEventListener('click', async () => {
+    const url = ($('webappUrl').value || '').trim();
+    const hint = $('setupHint');
+    if (!/^https:\/\/script\.google\.com\//.test(url)) {
+      hint.textContent = 'Cole a URL da implantação (script.google.com/macros/s/…).';
+      return;
+    }
+    setWebappUrl(url);
+    try {
+      await fetch('/api/calc-config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ webappUrl: url })
+      });
+    } catch (_) {}
+    closeSetup();
+    await confirmCurrentPart();
+  });
+
+  $('closeSetupBtn').addEventListener('click', closeSetup);
+
+  // ---- MakerWorld: importa tempo e gramas do link ----
+  let mwKey = '';
+  let mwTimer = null;
+  let marketKey = '';
+
+  function mwParse(raw) {
+    const m = String(raw || '').match(/makerworld\.com\/(?:[a-z]{2}(?:-[a-z]{2})?\/)?models\/(\d+)[^#\s]*(?:#profileId-(\d+))?/i);
+    return m ? { id: m[1], profile: m[2] || '' } : null;
+  }
+
+  function mwStatus(text, cls) {
+    const el = $('mwStatus');
+    el.className = 'mw-status' + (cls ? ' ' + cls : '');
+    el.textContent = text || '';
+  }
+
+  function mwApply(inst, announce) {
+    if (!inst) return;
+    const secs = Number(inst.prediction) || 0;
+    const w = Number(inst.weight) || 0;
+    if (secs > 0) {
+      const totalMin = Math.round(secs / 60);
+      horas.value = String(Math.floor(totalMin / 60) || '');
+      minutos.value = String(totalMin % 60 || '');
+    }
+    if (w > 0) gramas.value = String(w).replace('.', ',');
+    renderMwProfiles(inst.id);
+    if (announce) {
+      const bits = [];
+      if (secs > 0) bits.push(fmtHours(secs / 3600));
+      if (w > 0) bits.push(fmtGrams(w));
+      mwStatus(bits.length
+        ? 'MakerWorld · ' + (inst.title || 'perfil') + ': ' + bits.join(' · ') + '. Pode editar à vontade.'
+        : 'MakerWorld não informou tempo nem peso deste perfil.', bits.length ? 'is-ok' : 'is-err');
+    }
+    compute();
+  }
+
+  function renderMwProfiles(activeId) {
+    const box = $('mwProfiles');
+    if (!mwData || !mwData.instances || mwData.instances.length < 2) { box.innerHTML = ''; return; }
+    box.innerHTML = mwData.instances.map((i) => {
+      const bits = [];
+      if (i.prediction) bits.push(fmtHours(i.prediction / 3600));
+      if (i.weight) bits.push(fmtGrams(i.weight));
+      return '<button type="button" class="part-chip' + (String(i.id) === String(activeId) ? ' is-on' : '') +
+        '" data-mw="' + escapeHtml(i.id) + '">' + escapeHtml(i.title || ('Perfil ' + i.id)) +
+        '<small>' + escapeHtml(bits.join(' · ')) + '</small></button>';
+    }).join('');
+    box.querySelectorAll('[data-mw]').forEach((b) => b.addEventListener('click', () => {
+      const inst = mwData.instances.find((i) => String(i.id) === b.dataset.mw);
+      mwApply(inst, true);
+    }));
+  }
+
+  function mwCompact(d) {
+    if (!d || !Array.isArray(d.instances) || !d.instances.length) return null;
+    return {
+      ok: true,
+      id: d.id,
+      title: d.title || '',
+      defaultInstanceId: d.defaultInstanceId,
+      instances: d.instances.map((i) => ({
+        id: i.id, profileId: i.profileId, title: i.title || '',
+        prediction: i.prediction || 0, weight: i.weight || 0
+      }))
+    };
+  }
+
+  // Busca em paralelo: o primeiro que responder com dados vence.
+  // (No Netlify o MakerWorld costuma bloquear o servidor, então os proxies públicos correm junto.)
+  function mwTry(url, parse, ms) {
+    const ctl = new AbortController();
+    const t = setTimeout(() => ctl.abort(), ms);
+    return fetch(url, { cache: 'no-store', signal: ctl.signal })
+      .then((res) => { if (!res.ok) throw new Error('http ' + res.status); return res.json(); })
+      .then((d) => { const c = parse(d); if (!c) throw new Error('sem dados'); return c; })
+      .finally(() => clearTimeout(t));
+  }
+
+  function mwCacheGet(id) {
+    try {
+      const c = JSON.parse(localStorage.getItem('mw:' + id) || 'null');
+      if (c && Date.now() - c.t < 7 * 864e5) return c.d;
+    } catch (_) {}
+    return null;
+  }
+
+  function mwCacheSet(id, d) {
+    try { localStorage.setItem('mw:' + id, JSON.stringify({ t: Date.now(), d })); } catch (_) {}
+  }
+
+  async function mwFetch(ref) {
+    const cached = mwCacheGet(ref.id);
+    if (cached) return cached;
+    const api = 'https://makerworld.com/api/v1/design-service/design/' + ref.id;
+    const own = (d) => (d && d.ok && d.instances && d.instances.length ? d : null);
+    const wrapped = (d) => mwCompact(d && typeof d.contents === 'string' ? JSON.parse(d.contents) : d);
+    const tries = [
+      window.MW_WORKER ? mwTry(String(window.MW_WORKER).replace(/\/+$/, '') + '/?id=' + encodeURIComponent(ref.id), own, 12000) : Promise.reject(new Error('sem worker')),
+      mwTry('/api/makerworld?id=' + encodeURIComponent(ref.id), own, 12000),
+      mwTry('https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(api), wrapped, 15000),
+      mwTry('https://api.allorigins.win/raw?url=' + encodeURIComponent(api), wrapped, 15000),
+      mwTry('https://api.allorigins.win/get?url=' + encodeURIComponent(api), wrapped, 15000)
+    ];
+    try {
+      const data = await Promise.any(tries);
+      mwCacheSet(ref.id, data);
+      return data;
+    } catch (_) {
+      throw new Error('MakerWorld não respondeu');
+    }
+  }
+
+  function marketCacheGet(q) {
+    try {
+      const c = JSON.parse(localStorage.getItem('mkt:' + q) || 'null');
+      if (c && Date.now() - c.t < 12 * 3600 * 1000) return c.d;
+    } catch (_) {}
+    return null;
+  }
+
+  function marketCacheSet(q, d) {
+    try { localStorage.setItem('mkt:' + q, JSON.stringify({ t: Date.now(), d })); } catch (_) {}
+  }
+
+  function hideMarket() {
+    marketKey = '';
+    marketData = null;
+    const box = $('marketBox');
+    box.hidden = true;
+    $('marketQuery').textContent = '';
+    $('marketRows').innerHTML = '';
+    $('marketList').innerHTML = '';
+    $('marketVerdict').hidden = true;
+    $('marketVerdict').innerHTML = '';
+  }
+
+  function renderMarketVerdict() {
+    const el = $('marketVerdict');
+    if (!marketData || !marketData.ok) { el.hidden = true; return; }
+    const unit = last && last.price && last.units ? last.price / last.units : 0;
+    const med = marketData.all && marketData.all.median;
+    if (!unit || !med) {
+      el.hidden = true;
+      return;
+    }
+    const ratio = unit / med;
+    const diff = Math.round(Math.abs(ratio - 1) * 100);
+    let cls = 'is-mid';
+    let note = 'Na faixa da mediana do mercado.';
+    if (ratio <= 0.85) { cls = 'is-low'; note = diff + '% abaixo da mediana — tem espaço para pedir mais.'; }
+    else if (ratio >= 1.25) { cls = 'is-high'; note = diff + '% acima da mediana — o praticado está mais barato.'; }
+    else if (ratio >= 1.08) { cls = 'is-high'; note = diff + '% acima da mediana.'; }
+    else if (ratio <= 0.92) { cls = 'is-low'; note = diff + '% abaixo da mediana.'; }
+    el.hidden = false;
+    el.className = 'market__verdict ' + cls;
+    el.innerHTML = '<b>Nosso unitário ' + escapeHtml(money(unit)) + ' · mediana ' + escapeHtml(money(med)) + '</b><span>' + escapeHtml(note) + ' Comparação com 1 peça nos anúncios.</span>';
+  }
+
+  function renderMarket(data) {
+    const box = $('marketBox');
+    box.hidden = false;
+    $('marketQuery').textContent = data.query
+      ? 'Busca: ' + data.query
+      : 'Varrendo Shopee, Mercado Livre e Temu…';
+    const rows = $('marketRows');
+    const list = $('marketList');
+    if (!data.marketplaces) {
+      rows.innerHTML = '';
+      list.innerHTML = '';
+      $('marketVerdict').hidden = true;
+      return;
+    }
+    rows.innerHTML = data.marketplaces.map((m) => {
+      const range = m.count
+        ? money(m.min) + ' — ' + money(m.max)
+        : (m.error || 'sem anúncios');
+      const med = m.median ? ' · mediana ' + money(m.median) : '';
+      return '<a class="market__row" href="' + escapeHtml(m.searchUrl) + '" target="_blank" rel="noopener">' +
+        '<span><small>' + escapeHtml(m.label) + (m.count ? ' · ' + m.count + ' anúncio' + (m.count === 1 ? '' : 's') : '') + '</small>' +
+        escapeHtml(m.count ? range + med : range) + '</span>' +
+        '<em>abrir</em></a>';
+    }).join('');
+    const items = (data.listings || []).slice().sort((a, b) => a.price - b.price).slice(0, 8);
+    list.innerHTML = items.map((it) =>
+      '<a href="' + escapeHtml(it.url) + '" target="_blank" rel="noopener">' +
+        '<span><span class="src">' + escapeHtml(it.label || it.marketplace || '') + '</span>' + escapeHtml(it.title) + '</span>' +
+        '<span class="mono">' + escapeHtml(money(it.price)) + '</span></a>'
+    ).join('');
+    renderMarketVerdict();
+  }
+
+  async function marketFetch(title) {
+    const cached = marketCacheGet(title);
+    if (cached) return cached;
+    const own = (d) => (d && (d.ok || (d.marketplaces && d.marketplaces.length)) ? d : null);
+    const q = encodeURIComponent(title);
+    const tries = [
+      window.MW_WORKER ? mwTry(String(window.MW_WORKER).replace(/\/+$/, '') + '/market?q=' + q, own, 20000) : Promise.reject(new Error('sem worker')),
+      mwTry('/api/market?q=' + q, own, 20000)
+    ];
+    const data = await Promise.any(tries);
+    marketCacheSet(title, data);
+    return data;
+  }
+
+  async function marketStart(title) {
+    const q = String(title || '').trim();
+    if (!q) { hideMarket(); return; }
+    if (q === marketKey && marketData) { renderMarket(marketData); return; }
+    marketKey = q;
+    renderMarket({ query: 'lendo anúncios…', marketplaces: null });
+    $('marketQuery').textContent = 'Varrendo Shopee, Mercado Livre e Temu…';
+    try {
+      const data = await marketFetch(q);
+      if (marketKey !== q) return;
+      marketData = data;
+      if (data.title && !$('projectName').textContent) $('projectName').textContent = data.title;
+      renderMarket(data);
+    } catch (e) {
+      if (marketKey !== q) return;
+      renderMarket({
+        query: q,
+        ok: false,
+        marketplaces: [
+          { id: 'shopee', label: 'Shopee', count: 0, searchUrl: 'https://shopee.com.br/search?keyword=' + encodeURIComponent(q), error: 'abrir busca' },
+          { id: 'mercadolivre', label: 'Mercado Livre', count: 0, searchUrl: 'https://lista.mercadolivre.com.br/' + encodeURIComponent(q.replace(/\s+/g, '-')), error: 'abrir busca' },
+          { id: 'temu', label: 'Temu', count: 0, searchUrl: 'https://www.temu.com/search_result.html?search_key=' + encodeURIComponent(q), error: 'abrir busca' }
+        ],
+        listings: []
+      });
+      $('marketQuery').textContent = 'Não deu para ler os anúncios automaticamente. Abra as buscas.';
+    }
+  }
+
+  async function mwLookup() {
+    const ref = mwParse(projeto.value);
+    if (!ref) {
+      mwKey = '';
+      mwData = null;
+      mwStatus('');
+      $('mwProfiles').innerHTML = '';
+      hideMarket();
+      return;
+    }
+    const key = ref.id + '#' + ref.profile;
+    if (key === mwKey) return;
+    mwKey = key;
+    mwStatus('Buscando tempo e gramas no MakerWorld…');
+    const slugName = parseProject(projeto.value).name;
+    try {
+      const data = (mwData && String(mwData.id) === ref.id) ? mwData : await mwFetch(ref);
+      if (mwKey !== key) return;
+      mwData = data;
+      if (data.title) $('projectName').textContent = data.title;
+      const list = data.instances || [];
+      const inst = list.find((i) => String(i.id) === ref.profile || String(i.profileId) === ref.profile)
+        || list.find((i) => String(i.id) === String(data.defaultInstanceId))
+        || list[0];
+      if (!inst) { mwStatus('Modelo encontrado, mas sem perfis de impressão.', 'is-err'); }
+      else mwApply(inst, true);
+      marketStart(data.title || slugName);
+    } catch (e) {
+      if (mwKey !== key) return;
+      mwKey = '';
+      mwStatus('Não consegui ler o MakerWorld (' + (e.message || 'erro') + '). Preencha à mão.', 'is-err');
+      if (slugName) marketStart(slugName);
+    }
+  }
+
+  projeto.addEventListener('input', () => {
+    clearTimeout(mwTimer);
+    mwTimer = setTimeout(mwLookup, 450);
+  });
+  projeto.addEventListener('paste', () => {
+    clearTimeout(mwTimer);
+    mwTimer = setTimeout(mwLookup, 50);
+  });
+
+  const bootHash = (location.hash || '').replace(/^#/, '').toLowerCase();
+  if (bootHash === 'pessoais' || bootHash === 'personal') setMode('personal');
+  else if (bootHash === 'avancada' || bootHash === 'advanced') setMode('advanced');
+  else compute();
+  renderPartsBar();
+  fetch('/api/calc-config').then((r) => r.json()).then((d) => {
+    if (d && d.webappUrl) setWebappUrl(d.webappUrl);
+  }).catch(() => {});
+})();
+</script>
+</body>
+</html>

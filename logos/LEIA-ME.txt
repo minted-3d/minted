@@ -1,0 +1,11 @@
+COMO TROCAR AS LOGOS DA FAIXA "Empresas que já imprimiram com a gente"
+
+1. Substitua os arquivos desta pasta pelas logos reais, mantendo o MESMO nome
+   (ex.: novatech.svg). Prefira SVG ou PNG com fundo transparente; monocromático
+   fica mais elegante — o site já deixa em cinza e colore no hover.
+
+2. Para adicionar/remover empresas, edite APENAS a lista dentro de
+   <div class="marquee__track" data-marquee> ... </div> no index.html.
+   O site duplica a lista sozinho para a rolagem ficar contínua.
+
+3. Altura recomendada: as logos são exibidas com ~30px de altura.

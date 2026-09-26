@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Calculadora · Minted</title>
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet" />
+<meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet" />
+<link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;700;800&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../styles.css" />
+<style>
+  body { background: var(--paper); min-height: 100vh; }
+  .calc-header {
+    position: sticky; top: 0; z-index: 20;
+    background: rgba(255,255,255,.92);
+    backdrop-filter: saturate(150%) blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  .calc-header__inner {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 56px; gap: 16px;
+  }
+  .calc-header__links { display: flex; align-items: center; gap: 14px; }
+  .calc-header__links a {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--ink-3);
+  }
+  .calc-header__links a:hover { color: var(--navy); }
+  .badge {
+    font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+    letter-spacing: .12em; text-transform: uppercase;
+    color: var(--mint-ink); background: var(--mint);
+    padding: 6px 11px; border-radius: var(--r-full);
+  }
+  main { padding: 28px 0 64px; }
+  .sheet {
+    max-width: 560px; margin-inline: auto;
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 18px; box-shadow: var(--shadow-1); overflow: hidden;
+  }
+  .sheet__body { padding: 22px 22px 8px; display: grid; gap: 18px; }
+  .field label {
+    display: block; margin-bottom: 8px;
+    font-family: var(--font-display); font-weight: 700; font-size: 15px;
+  }
+  .field input[type="url"], .field input[type="text"] {
+    width: 100%; min-height: 52px; padding: 12px 14px;
+    border: 1.5px solid var(--line-strong); border-radius: 12px;
+    background: var(--paper); color: var(--ink);
+    font-family: var(--font-mono); font-size: 14px;
+  }
+  .field input:focus { outline: 2px solid var(--cyan); outline-offset: 2px; }
+  .seg {
+    display: grid; gap: 6px;
+    background: var(--paper); border: 1px solid var(--line);
+    border-radius: 12px; padding: 5px;
+  }
+  .seg--2 { grid-template-columns: 1fr 1fr; }
+  .seg--cores { grid-template-columns: repeat(4, 1fr); }
+  .seg--cores button:last-child { grid-column: 1 / -1; }
+  .seg button {
+    min-height: 48px; border: 0; border-radius: 10px; cursor: pointer;
+    background: transparent; color: var(--ink-2);
+    font-family: var(--font-display); font-weight: 700; font-size: 15px;
+  }
+  .seg button[aria-pressed="true"] {
+    background: var(--navy-deep); color: #fff;
+    box-shadow: 0 4px 14px rgba(13,27,42,.18);
+  }
+  .out {
+    margin: 18px 8px 8px; padding: 22px 18px 26px;
+    background: var(--navy-deep); color: #fff; border-radius: 14px;
+    text-align: center; min-height: 92px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .out.is-price {
+    font-family: var(--font-display); font-weight: 800;
+    font-size: clamp(28px, 6vw, 40px); letter-spacing: -0.03em; line-height: 1.1;
+  }
+  .out.is-wait {
+    font-family: var(--font-body); font-size: 15px; color: var(--on-dark-muted);
+  }
+  @media (max-width: 640px) {
+    .sheet__body { padding: 18px 16px 6px; }
+    .seg--cores { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<header class="calc-header">
+  <div class="container calc-header__inner">
+    <a href="../index.html" class="brand" aria-label="Minted — página inicial">
+      <svg class="brand__mark" viewBox="0 0 200 210" aria-hidden="true">
+        <defs><linearGradient id="gnav" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3be08f"/><stop offset="1" stop-color="#24c3cf"/></linearGradient></defs>
+        <path d="M168 61 L168 139 L100 178" fill="none" stroke="#16345f" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M168 61 L100 22 L32 61 L32 139" fill="none" stroke="url(#gnav)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M100 72 L131 90 L100 108 L69 90 Z" fill="#3fe0a4"/><path d="M69 90 L100 108 L100 144 L69 126 Z" fill="#24c3cf"/><path d="M100 108 L131 90 L131 126 L100 144 Z" fill="#1e8fbe"/>
+      </svg>
+      <span class="brand__name">Mint<span class="td">3D</span></span>
+    </a>
+    <div class="calc-header__links">
+      <a href="../admin/">Ficha completa</a>
+      <span class="badge">Calculadora</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+    <form class="sheet" id="form" autocomplete="off">
+      <div class="sheet__body">
+        <div class="field">
+          <label for="link">Link do MakerWorld</label>
+          <input id="link" type="url" inputmode="url" placeholder="https://makerworld.com/…" spellcheck="false" />
+        </div>
+
+        <div class="field">
+          <label id="labChaveiro">Chaveiro</label>
+          <div class="seg seg--2" role="group" aria-labelledby="labChaveiro">
+            <button type="button" data-chaveiro="nao" aria-pressed="true">Não</button>
+            <button type="button" data-chaveiro="sim" aria-pressed="false">Sim</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label id="labNfc">NFC</label>
+          <div class="seg seg--2" role="group" aria-labelledby="labNfc">
+            <button type="button" data-nfc="nao" aria-pressed="true">Não</button>
+            <button type="button" data-nfc="sim" aria-pressed="false">Sim</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label id="labCores">Cores</label>
+          <div class="seg seg--cores" role="group" aria-labelledby="labCores">
+            <button type="button" data-cores="1" aria-pressed="true">1</button>
+            <button type="button" data-cores="2" aria-pressed="false">2</button>
+            <button type="button" data-cores="3" aria-pressed="false">3</button>
+            <button type="button" data-cores="4" aria-pressed="false">4</button>
+            <button type="button" data-cores="pintado" aria-pressed="false">Pintado à mão</button>
+          </div>
+        </div>
+      </div>
+      <p class="out is-wait" id="out" aria-live="polite">Cole o link do MakerWorld.</p>
+    </form>
+  </div>
+</main>
+
+<script src="mw-worker.js"></script>
+<script>
+(function () {
+  const DEPRECIATION_PER_H = 3000 / 5000;
+  const ENERGY_PER_H = 1;
+  const CALIBRATION_H = 20 / 60;
+  const ERROR = 0.15;
+  const RING_UNIT = 40 / 100;
+  const NFC_UNIT = 25 / 100;
+  const FILAMENT_KG_DEFAULT = 100;
+  const MARKUP = 2;
+  const PAINT = 1.30;
+
+  // Kobra X, Clearance Castle (Tom's Hardware), mesmos ajustes dos dois lados:
+  // 776 trocas, 35 s da faca até a purga, 150 g de purga + 42 g de torre,
+  // 13 h 10 min no total. O tempo de modelo fica em ~5,62 h.
+  // Cada cor além da primeira sai nesse ritmo: ~46 trocas por hora de modelo.
+  const SWAP_S = 35;
+  const WASTE_G = (150 + 42) / 776;
+  const CASTLE_TOTAL_H = 13 + 10 / 60;
+  const CASTLE_MODEL_H = CASTLE_TOTAL_H - (776 * SWAP_S / 3600);
+  const SWAPS_PER_H_PER_EXTRA = 776 / 3 / CASTLE_MODEL_H;
+
+  const $ = (id) => document.getElementById(id);
+  const link = $('link');
+  const out = $('out');
+  let chaveiro = false;
+  let nfc = false;
+  let cores = '1';
+  let model = null;
+  let mwKey = '';
+  let timer = null;
+
+  const money = (n) => n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+  function kgPrice() {
+    try {
+      const saved = localStorage.getItem('minted.calc.precoKg');
+      if (saved) {
+        let s = saved.trim().replace(/\s/g, '').replace(/R\$/gi, '');
+        if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
+        const n = parseFloat(s);
+        if (Number.isFinite(n) && n > 0) return n;
+      }
+    } catch (_) {}
+    return FILAMENT_KG_DEFAULT;
+  }
+
+  function priceOf(job) {
+    const baseH = job.seconds / 3600;
+    const painted = cores === 'pintado';
+    const nCores = painted ? 1 : Number(cores);
+    const swaps = (nCores - 1) * SWAPS_PER_H_PER_EXTRA * baseH;
+    const machineH = baseH + (swaps * SWAP_S / 3600) + CALIBRATION_H;
+    const grams = job.grams + swaps * WASTE_G;
+    const raw = (grams / 1000) * kgPrice() + (DEPRECIATION_PER_H + ENERGY_PER_H) * machineH;
+    const cost = raw * (1 + ERROR) + (chaveiro ? RING_UNIT : 0) + (nfc ? NFC_UNIT : 0);
+    return cost * MARKUP * (painted ? PAINT : 1);
+  }
+
+  function showWait(text) {
+    out.className = 'out is-wait';
+    out.textContent = text;
+  }
+
+  function showPrice(value) {
+    out.className = 'out is-price';
+    out.textContent = 'PREÇO: ' + money(value);
+  }
+
+  function render() {
+    if (!model) return;
+    if (!(model.seconds > 0) && !(model.grams > 0)) {
+      showWait('Esse perfil não traz tempo nem peso.');
+      return;
+    }
+    showPrice(priceOf(model));
+  }
+
+  function press(attr, value) {
+    document.querySelectorAll('[' + attr + ']').forEach((b) => {
+      b.setAttribute('aria-pressed', b.getAttribute(attr) === value ? 'true' : 'false');
+    });
+  }
+
+  document.querySelectorAll('[data-chaveiro]').forEach((b) => b.addEventListener('click', () => {
+    chaveiro = b.dataset.chaveiro === 'sim';
+    press('data-chaveiro', b.dataset.chaveiro);
+    render();
+  }));
+  document.querySelectorAll('[data-nfc]').forEach((b) => b.addEventListener('click', () => {
+    nfc = b.dataset.nfc === 'sim';
+    press('data-nfc', b.dataset.nfc);
+    render();
+  }));
+  document.querySelectorAll('[data-cores]').forEach((b) => b.addEventListener('click', () => {
+    cores = b.dataset.cores;
+    press('data-cores', b.dataset.cores);
+    render();
+  }));
+
+  function parseLink(raw) {
+    const m = String(raw || '').match(/makerworld\.com\/(?:[a-z]{2}(?:-[a-z]{2})?\/)?models\/(\d+)[^#\s]*(?:#profileId-(\d+))?/i);
+    return m ? { id: m[1], profile: m[2] || '' } : null;
+  }
+
+  function compact(d) {
+    if (!d || !Array.isArray(d.instances) || !d.instances.length) return null;
+    return {
+      id: d.id,
+      defaultInstanceId: d.defaultInstanceId,
+      instances: d.instances.map((i) => ({
+        id: i.id,
+        profileId: i.profileId,
+        prediction: Number(i.prediction) || 0,
+        weight: Number(i.weight) || 0
+      }))
+    };
+  }
+
+  function tryFetch(url, parse, ms) {
+    const ctl = new AbortController();
+    const t = setTimeout(() => ctl.abort(), ms);
+    return fetch(url, { cache: 'no-store', signal: ctl.signal })
+      .then((res) => { if (!res.ok) throw new Error('http ' + res.status); return res.json(); })
+      .then((d) => { const c = parse(d); if (!c) throw new Error('sem dados'); return c; })
+      .finally(() => clearTimeout(t));
+  }
+
+  async function lookup(ref) {
+    const worker = (window.MW_WORKER ? String(window.MW_WORKER).replace(/\/+$/, '') : '');
+    const api = 'https://makerworld.com/api/v1/design-service/design/' + ref.id;
+    const own = (d) => (d && d.ok && d.instances && d.instances.length ? compact(d) : null);
+    const wrapped = (d) => compact(d && typeof d.contents === 'string' ? JSON.parse(d.contents) : d);
+    const tries = [
+      worker ? tryFetch(worker + '/?id=' + encodeURIComponent(ref.id), own, 12000) : Promise.reject(new Error('sem worker')),
+      tryFetch('/api/makerworld?id=' + encodeURIComponent(ref.id), own, 12000),
+      tryFetch('https://api.allorigins.win/get?url=' + encodeURIComponent(api), wrapped, 15000)
+    ];
+    return Promise.any(tries);
+  }
+
+  function pick(data, profile) {
+    const list = data.instances || [];
+    return list.find((i) => String(i.id) === profile || String(i.profileId) === profile)
+      || list.find((i) => String(i.id) === String(data.defaultInstanceId))
+      || list[0]
+      || null;
+  }
+
+  async function readLink() {
+    const ref = parseLink(link.value);
+    if (!ref) {
+      mwKey = '';
+      model = null;
+      showWait(link.value.trim() ? 'Cole um link do MakerWorld.' : 'Cole o link do MakerWorld.');
+      return;
+    }
+    const key = ref.id + '#' + ref.profile;
+    if (key === mwKey && model) { render(); return; }
+    mwKey = key;
+    model = null;
+    showWait('Lendo o MakerWorld…');
+    try {
+      const data = await lookup(ref);
+      if (mwKey !== key) return;
+      const inst = pick(data, ref.profile);
+      if (!inst) {
+        showWait('Modelo sem perfil de impressão.');
+        return;
+      }
+      model = { seconds: inst.prediction, grams: inst.weight };
+      render();
+    } catch (_) {
+      if (mwKey !== key) return;
+      mwKey = '';
+      showWait('Não consegui ler esse link.');
+    }
+  }
+
+  link.addEventListener('input', () => {
+    clearTimeout(timer);
+    timer = setTimeout(readLink, 400);
+  });
+  link.addEventListener('paste', () => {
+    clearTimeout(timer);
+    timer = setTimeout(readLink, 40);
+  });
+  $('form').addEventListener('submit', (e) => e.preventDefault());
+})();
+</script>
+</body>
+</html>
