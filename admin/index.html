@@ -994,7 +994,7 @@
         <li>Nesta peça, trocas = (cores − 1) × essa taxa × horas do modelo. As horas são as que estão em “horas” e “minutos”, de uma prancha. A calibragem de 20 min não entra nessa base e não se repete por cor.</li>
         <li>Tempo a mais = trocas × 35 s. Esse tempo paga depreciação (R$ 0,60/h) e luz (R$ 1,00/h).</li>
         <li>Gramas a mais = trocas × (150 g + 42 g) ÷ 776. Os 150 g são a purga. Os 42 g são a torre. Os dois viajam juntos porque, no teste, a torre também foi resíduo da troca. Essas gramas entram no preço do filamento (R$/kg desta ficha).</li>
-        <li>Filamento extra + máquina extra recebem a folga de 15%. Chaveiro (R$ 0,40) e NFC (R$ 0,25) somam no custo, fora dessa folga. O preço simples sai desse custo com margem de 70%: lucro ÷ receita = 70%, então preço = custo ÷ 0,30.</li>
+        <li>Filamento extra + máquina extra recebem a folga de 15%. Chaveiro (R$ 0,40) e NFC (R$ 0,25) somam no custo, fora dessa folga. O preço simples é esse custo com margem de 70%, igual à ficha: preço = custo × 1,70. Uma cor não soma troca nem purga.</li>
         <li>Pintado à mão não usa troca nem purga. É o preço de 1 cor, já com a margem de 70%, mais 30%.</li>
       </ol>
 
@@ -1716,7 +1716,7 @@
         machine: money(machine),
         erro: money(erro),
         extraCost: money(extraCost),
-        price: money(extraCost / (1 - MARGIN_STD))
+        price: money(extraCost * (1 + MARGIN_STD))
       };
     }
     const labels = [
