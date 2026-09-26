@@ -4,7 +4,7 @@
 // Usado pela calculadora da Minted no site publicado (o Netlify é bloqueado pelo MakerWorld).
 import { marketLookup } from './market.js';
 
-const ALLOWED = [/^https:\/\/(www\.)?minted\.com\.br$/, /\.netlify\.app$/, /^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/];
+const ALLOWED = [/^https:\/\/(www\.)?minted\.com\.br$/, /\.netlify\.app$/, /^https:\/\/minted-3d\.github\.io$/, /^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/];
 
 const MW_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36',
