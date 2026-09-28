@@ -12,7 +12,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;700;800&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="../styles.css" />
 <style>
-  body { background: var(--paper); min-height: 100vh; }
+  body { background: var(--paper); min-height: 100vh; overflow-x: clip; }
+  .calc-header__inner, .calc-header__links, .sheet, .sheet__body { min-width: 0; }
   .calc-header {
     position: sticky; top: 0; z-index: 20;
     background: rgba(255,255,255,.92);
@@ -29,6 +30,7 @@
     text-transform: uppercase; color: var(--ink-3);
   }
   .calc-header__links a:hover { color: var(--navy); }
+  .link-short { display: none; }
   .badge {
     font-family: var(--font-mono); font-size: 11px; font-weight: 500;
     letter-spacing: .12em; text-transform: uppercase;
@@ -58,13 +60,19 @@
     background: var(--paper); border: 1px solid var(--line);
     border-radius: 12px; padding: 5px;
   }
-  .seg--2 { grid-template-columns: 1fr 1fr; }
-  .seg--cores { grid-template-columns: repeat(4, 1fr); }
+  .seg--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .seg--cores { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .seg--cores button:last-child { grid-column: 1 / -1; }
+  .field, .seg { min-width: 0; }
   .seg button {
-    min-height: 48px; border: 0; border-radius: 10px; cursor: pointer;
+    min-width: 0; min-height: 48px; border: 0; border-radius: 10px; cursor: pointer;
     background: transparent; color: var(--ink-2);
     font-family: var(--font-display); font-weight: 700; font-size: 15px;
+    line-height: 1.15; padding: 8px 6px; white-space: normal;
+  }
+  .seg-price {
+    display: block; margin-top: 2px;
+    font-family: var(--font-mono); font-size: 12px; font-weight: 500; letter-spacing: 0;
   }
   .seg button[aria-pressed="true"] {
     background: var(--navy-deep); color: #fff;
@@ -83,9 +91,24 @@
   .out.is-wait {
     font-family: var(--font-body); font-size: 15px; color: var(--on-dark-muted);
   }
+  .hint {
+    margin: 8px 2px 0;
+    font-size: 13px; color: var(--ink-3); line-height: 1.35;
+    overflow-wrap: anywhere;
+  }
+  .hint b { font-family: var(--font-mono); font-weight: 500; color: var(--ink-2); }
+  .out-note {
+    margin: 0 18px 16px; text-align: center;
+    font-size: 13px; color: var(--ink-3); line-height: 1.4;
+  }
   @media (max-width: 640px) {
-    .sheet__body { padding: 18px 16px 6px; }
-    .seg--cores { grid-template-columns: 1fr 1fr; }
+    .badge { display: none; }
+    .link-long { display: none; }
+    .link-short { display: inline; }
+    .sheet__body { padding: 18px 16px 6px; grid-template-columns: minmax(0, 1fr); }
+    .seg--cores { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .calc-header__links a { font-size: 10px; letter-spacing: .04em; }
+    .seg--2 button { font-size: 14px; }
   }
 </style>
 </head>
@@ -102,7 +125,7 @@
       <span class="brand__name">Mint<span class="td">3D</span></span>
     </a>
     <div class="calc-header__links">
-      <a href="../admin/">Ficha completa</a>
+      <a href="../admin/"><span class="link-long">Ficha completa</span><span class="link-short">Ficha</span></a>
       <span class="badge">Calculadora</span>
     </div>
   </div>
@@ -121,16 +144,18 @@
           <label id="labChaveiro">Chaveiro</label>
           <div class="seg seg--2" role="group" aria-labelledby="labChaveiro">
             <button type="button" data-chaveiro="nao" aria-pressed="true">Não</button>
-            <button type="button" data-chaveiro="sim" aria-pressed="false">Sim</button>
+            <button type="button" data-chaveiro="sim" aria-pressed="false">Sim<span class="seg-price">R$ 2,00</span></button>
           </div>
+          <p class="hint">Soma <b>R$ 2,00</b> no preço, fora da margem e da pintura.</p>
         </div>
 
         <div class="field">
           <label id="labNfc">NFC</label>
           <div class="seg seg--2" role="group" aria-labelledby="labNfc">
             <button type="button" data-nfc="nao" aria-pressed="true">Não</button>
-            <button type="button" data-nfc="sim" aria-pressed="false">Sim</button>
+            <button type="button" data-nfc="sim" aria-pressed="false">Sim<span class="seg-price">R$ 2,50</span></button>
           </div>
+          <p class="hint">Soma <b>R$ 2,50</b> no preço, fora da margem e da pintura.</p>
         </div>
 
         <div class="field">
@@ -145,6 +170,7 @@
         </div>
       </div>
       <p class="out is-wait" id="out" aria-live="polite">Cole o link do MakerWorld.</p>
+      <p class="out-note" id="outNote" hidden></p>
     </form>
   </div>
 </main>
@@ -156,8 +182,8 @@
   const ENERGY_PER_H = 1;
   const CALIBRATION_H = 20 / 60;
   const ERROR = 0.15;
-  const RING_UNIT = 40 / 100;
-  const NFC_UNIT = 25 / 100;
+  const RING_PRICE = 2;
+  const NFC_PRICE = 2.5;
   const FILAMENT_KG_DEFAULT = 100;
   const MARGIN = 0.70;
   const PAINT = 1.30;
@@ -205,19 +231,28 @@
     const machineH = baseH + (swaps * SWAP_S / 3600) + CALIBRATION_H;
     const grams = job.grams + swaps * WASTE_G;
     const raw = (grams / 1000) * kgPrice() + (DEPRECIATION_PER_H + ENERGY_PER_H) * machineH;
-    const cost = raw * (1 + ERROR) + (chaveiro ? RING_UNIT : 0) + (nfc ? NFC_UNIT : 0);
-    const price = cost * (1 + MARGIN);
-    return price * (painted ? PAINT : 1);
+    let price = raw * (1 + ERROR) * (1 + MARGIN);
+    if (painted) price *= PAINT;
+    if (chaveiro) price += RING_PRICE;
+    if (nfc) price += NFC_PRICE;
+    return price;
   }
 
   function showWait(text) {
     out.className = 'out is-wait';
     out.textContent = text;
+    $('outNote').hidden = true;
   }
 
   function showPrice(value) {
     out.className = 'out is-price';
     out.textContent = 'PREÇO: ' + money(value);
+    const bits = [];
+    if (chaveiro) bits.push('chaveiro ' + money(RING_PRICE));
+    if (nfc) bits.push('NFC ' + money(NFC_PRICE));
+    const note = $('outNote');
+    note.hidden = bits.length === 0;
+    note.textContent = bits.length ? 'Inclui ' + bits.join(' e ') + '.' : '';
   }
 
   function render() {

@@ -121,18 +121,23 @@
   .toggle[aria-pressed="true"] .switch { background: var(--mint-deep); }
   .toggle[aria-pressed="true"] .switch::after { transform: translateX(18px); }
 
+  .stack, .stack .field, .seg { min-width: 0; }
   .seg {
     display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px;
     background: var(--paper); border: 1px solid var(--line);
     border-radius: 12px; padding: 5px;
   }
-  .seg--2 { grid-template-columns: 1fr 1fr; }
+  .seg--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .seg--pack { grid-template-columns: 1fr 1fr; }
   .seg button {
-    min-height: 52px; border: 0; border-radius: 10px; cursor: pointer;
+    min-width: 0; min-height: 52px; border: 0; border-radius: 10px; cursor: pointer;
     background: transparent; color: var(--ink-2);
     font-family: var(--font-display); font-weight: 600; font-size: 13.5px; line-height: 1.15;
-    padding: 8px 6px;
+    padding: 8px 6px; white-space: normal;
+  }
+  .seg-price {
+    display: block; margin-top: 2px;
+    font-family: var(--font-mono); font-size: 11px; font-weight: 500; letter-spacing: 0;
   }
   .seg button[aria-pressed="true"] {
     background: var(--ink); color: #fff;
@@ -222,11 +227,12 @@
   }
   .assumptions li {
     list-style: none; display: flex; justify-content: space-between; gap: 10px;
-    font-size: 13px; color: var(--ink-2);
+    font-size: 13px; color: var(--ink-2); min-width: 0;
   }
+  .assumptions li span { min-width: 0; }
   .assumptions b {
     font-family: var(--font-mono); font-weight: 500; font-size: 12px; color: var(--ink);
-    text-align: right;
+    text-align: right; min-width: 0; overflow-wrap: anywhere;
   }
 
   .kobra {
@@ -493,12 +499,16 @@
     color: #5a6b63; margin-bottom: 2px;
   }
   @media (max-width: 900px) {
-    .calc-grid { grid-template-columns: 1fr; }
+    .calc-grid { grid-template-columns: minmax(0, 1fr); }
+    .ticket, .mode-bar, .quote { min-width: 0; }
     .quote { position: static; }
     .in input.big { font-size: 22px; }
     .seg { grid-template-columns: 1fr; }
     .seg--2, .seg--pack { grid-template-columns: 1fr 1fr; }
-    .mode-bar { grid-template-columns: 1fr 1fr 1fr; }
+    .mode-bar { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .mode-bar button { min-width: 0; white-space: normal; font-size: 12px; line-height: 1.15; }
+    .calc-badge { letter-spacing: .06em; padding: 6px 8px; }
+    .assumptions li { align-items: baseline; }
     .seg button { min-height: 48px; }
     .kpis { grid-template-columns: 1fr 1fr; }
     .wa-msg .pair { grid-template-columns: 1fr; }
@@ -670,7 +680,7 @@
     <div class="calc-intro">
       <span class="spec" id="introSpec">Ficha de custo</span>
       <h1 class="display mt-16">Custo e preço, na hora.</h1>
-      <p class="lead mt-16" id="introLead">Link, tempo, gramas totais e quantas peças na prancha. O resumo já sai pronto para o WhatsApp.</p>
+      <p class="lead mt-16" id="introLead">Link, tempo, gramas e quantas peças na prancha. Chaveiro e NFC entram com preço fixo.</p>
     </div>
 
     <div class="calc-grid">
@@ -688,7 +698,7 @@
               <button type="button" data-mode="advanced" aria-pressed="false">Avançada</button>
               <button type="button" data-mode="personal" aria-pressed="false">Proj. Pessoais</button>
             </div>
-            <p class="hint" id="modeHint">Impressão, filamento e margem. Sem argola, NFC ou embalagem.</p>
+            <p class="hint" id="modeHint">Impressão com margem de 70%. Chaveiro cobra R$ 2 e NFC R$ 2,50, fora dessa margem. Embalagem fica na avançada.</p>
           </div>
 
           <div class="field">
@@ -779,7 +789,7 @@
               <input type="range" id="margemInput" name="margemInput" min="0" max="100" step="5" value="70" aria-describedby="margemOut" />
               <div class="slider__ends"><span>0%</span><span>100%</span></div>
             </div>
-            <p class="hint">Arraste para achar o preço. Aplicada sobre o custo (impressão + adicionais). Padrão 70%; personalizado 100%.</p>
+            <p class="hint">Arraste para achar o preço da impressão e da embalagem. Chaveiro cobra R$ 2 (custa R$ 1). NFC cobra R$ 2,50 (custa R$ 2). Esses dois não seguem a barra.</p>
           </div>
 
           <div class="field">
@@ -792,25 +802,25 @@
             <p class="hint" id="finishHint">Preço normal, com margem.</p>
           </div>
 
+          <div class="field">
+            <label>É chaveiro com argola?</label>
+            <div class="seg seg--2" role="group" aria-label="Chaveiro com argola">
+              <button type="button" data-ring="nao" aria-pressed="true">Não</button>
+              <button type="button" data-ring="sim" aria-pressed="false">Sim<span class="seg-price">R$ 2,00</span></button>
+            </div>
+            <p class="hint">Custa <span class="yn-cost">R$ 1,00</span> · no preço cobra <span class="yn-cost">R$ 2,00</span>. Fora da margem.</p>
+          </div>
+
+          <div class="field">
+            <label>Leva etiqueta NFC?</label>
+            <div class="seg seg--2" role="group" aria-label="Etiqueta NFC">
+              <button type="button" data-nfc="nao" aria-pressed="true">Não</button>
+              <button type="button" data-nfc="sim" aria-pressed="false">Sim<span class="seg-price">R$ 2,50</span></button>
+            </div>
+            <p class="hint">Custa <span class="yn-cost">R$ 2,00</span> · no preço cobra <span class="yn-cost">R$ 2,50</span>. Fora da margem.</p>
+          </div>
+
           <div class="adv-block" id="advancedPanel">
-            <div class="field">
-              <label>É chaveiro com argola?</label>
-              <div class="seg seg--2" role="group" aria-label="Chaveiro com argola">
-                <button type="button" data-ring="nao" aria-pressed="true">Não</button>
-                <button type="button" data-ring="sim" aria-pressed="false">Sim</button>
-              </div>
-              <p class="hint">100 argolas custam R$ 40,00 · <span class="yn-cost">R$ 0,40 / un</span></p>
-            </div>
-
-            <div class="field">
-              <label>Leva etiqueta NFC?</label>
-              <div class="seg seg--2" role="group" aria-label="Etiqueta NFC">
-                <button type="button" data-nfc="nao" aria-pressed="true">Não</button>
-                <button type="button" data-nfc="sim" aria-pressed="false">Sim</button>
-              </div>
-              <p class="hint">100 etiquetas NFC custam R$ 25,00 · <span class="yn-cost">R$ 0,25 / un</span></p>
-            </div>
-
             <div class="field">
               <label>É embalado?</label>
               <div class="seg seg--2" role="group" aria-label="Peça embalada">
@@ -838,8 +848,8 @@
             <li><span>Margem</span><b id="assMargem">70%</b></li>
             <li><span>Depreciação + luz</span><b>R$ 0,60/h + R$ 1,00/h</b></li>
             <li id="assAsset" hidden><span>Ativo (impressora)</span><b>R$ 3.000</b></li>
-            <li id="assRing" hidden><span>Argola</span><b>R$ 40 / 100 un</b></li>
-            <li id="assNfc" hidden><span>NFC</span><b>R$ 25 / 100 un</b></li>
+            <li id="assRing" hidden><span>Chaveiro</span><b>custa R$ 1 · cobra R$ 2</b></li>
+            <li id="assNfc" hidden><span>NFC</span><b>custa R$ 2 · cobra R$ 2,50</b></li>
             <li id="assPack" hidden><span>Embalagem</span><b id="assPackVal">—</b></li>
           </ul>
         </div>
@@ -943,7 +953,7 @@
               <li><span>Depreciação</span><span class="mono" id="outDep">—</span></li>
               <li><span>Energia</span><span class="mono" id="outLuz">—</span></li>
               <li><span>Folga de erro 15%</span><span class="mono" id="outErro">—</span></li>
-              <li id="rowRing" hidden><span>Argola</span><span class="mono" id="outRing">—</span></li>
+              <li id="rowRing" hidden><span>Chaveiro</span><span class="mono" id="outRing">—</span></li>
               <li id="rowNfc" hidden><span>Etiqueta NFC</span><span class="mono" id="outNfc">—</span></li>
               <li id="rowPack" hidden><span id="outPackLabel">Embalagem</span><span class="mono" id="outPack">—</span></li>
               <li class="total"><span>Custo estimado</span><span class="mono" id="outCusto">—</span></li>
@@ -994,7 +1004,7 @@
         <li>Nesta peça, trocas = (cores − 1) × essa taxa × horas do modelo. As horas são as que estão em “horas” e “minutos”, de uma prancha. A calibragem de 20 min não entra nessa base e não se repete por cor.</li>
         <li>Tempo a mais = trocas × 35 s. Esse tempo paga depreciação (R$ 0,60/h) e luz (R$ 1,00/h).</li>
         <li>Gramas a mais = trocas × (150 g + 42 g) ÷ 776. Os 150 g são a purga. Os 42 g são a torre. Os dois viajam juntos porque, no teste, a torre também foi resíduo da troca. Essas gramas entram no preço do filamento (R$/kg desta ficha).</li>
-        <li>Filamento extra + máquina extra recebem a folga de 15%. Chaveiro (R$ 0,40) e NFC (R$ 0,25) somam no custo, fora dessa folga. O preço simples é esse custo com margem de 70%, igual à ficha: preço = custo × 1,70. Uma cor não soma troca nem purga.</li>
+        <li>Filamento extra + máquina extra recebem a folga de 15%. O preço da impressão é esse custo com margem de 70%: preço = custo × 1,70. Chaveiro e NFC entram depois, com preço fixo: chaveiro R$ 2 (custa R$ 1) e NFC R$ 2,50 (custa R$ 2). Não passam pela folga nem pela margem. Uma cor não soma troca nem purga.</li>
         <li>Pintado à mão não usa troca nem purga. É o preço de 1 cor, já com a margem de 70%, mais 30%.</li>
       </ol>
 
@@ -1058,12 +1068,10 @@
   const NEGO_MAX = 0.25;
   const PAINT_MULT = 2;
   const PRINTER_ASSET = 3000;
-  const RING_PACK_N = 100;
-  const RING_PACK_PRICE = 40;
-  const RING_UNIT = RING_PACK_PRICE / RING_PACK_N;
-  const NFC_PACK_N = 100;
-  const NFC_PACK_PRICE = 25;
-  const NFC_UNIT = NFC_PACK_PRICE / NFC_PACK_N;
+  const RING_COST = 1;
+  const RING_PRICE = 2;
+  const NFC_COST = 2;
+  const NFC_PRICE = 2.5;
   const KG_KEY = 'minted.calc.precoKg';
   const LOCO_KEY = 'minted.calc.locoPct';
   const LOCO_DEFAULT = 0.05;
@@ -1260,30 +1268,26 @@
       $('customHint').textContent = 'Margem 70%. Toque para 120%.';
       $('assMargem').textContent = '20%';
       $('introSpec').textContent = 'Calculadora Proj. Pessoais';
-      $('modeHint').textContent = 'Margem fixa de 20%. Argola, NFC e embalagem iguais. Sem negociação.';
-      $('introLead').textContent = 'Mesmos dados da avançada, com margem de 20%. O preço a pedir é o preço — sem faixa de desconto.';
+      $('modeHint').textContent = 'Margem fixa de 20% na impressão. Chaveiro cobra R$ 2 e NFC R$ 2,50, fora dessa margem. Sem negociação.';
+      $('introLead').textContent = 'Mesmos dados da avançada, com margem de 20% na impressão. Chaveiro e NFC têm preço fixo. O preço a pedir é o preço — sem faixa de desconto.';
       document.title = 'Calculadora Proj. Pessoais · uso interno | Minted';
     } else if (extrasOn) {
       syncMarginLabel();
       $('customHint').textContent = custom ? 'Margem preenchida com 100%. Ajuste na barra abaixo.' : 'Preenche a margem com 100%.';
       $('introSpec').textContent = 'Ficha de custo';
-      $('modeHint').textContent = 'Margem livre, argola, NFC, embalagem e análise de ROI / ROA entram no pedido.';
-      $('introLead').textContent = 'Mesma ficha, com argola, NFC, embalagem e a leitura financeira do pedido.';
+      $('modeHint').textContent = 'A barra mexe na impressão e na embalagem. Chaveiro cobra R$ 2 (custa R$ 1). NFC cobra R$ 2,50 (custa R$ 2).';
+      $('introLead').textContent = 'Mesma ficha, com chaveiro, NFC, embalagem e a leitura financeira do pedido.';
       document.title = 'Ficha de custo · uso interno | Minted';
     } else {
       $('assMargem').textContent = custom ? '120%' : '70%';
       $('customHint').textContent = custom ? 'Margem 120%.' : 'Margem 70%. Toque para 120%.';
       $('introSpec').textContent = 'Ficha de custo';
-      $('modeHint').textContent = 'Impressão, filamento e margem. Sem argola, NFC ou embalagem.';
-      $('introLead').textContent = 'Link, tempo, gramas totais e quantas peças na prancha. O resumo já sai pronto para o WhatsApp.';
+      $('modeHint').textContent = 'Impressão com margem de 70%. Chaveiro cobra R$ 2 e NFC R$ 2,50, fora dessa margem. Embalagem fica na avançada.';
+      $('introLead').textContent = 'Link, tempo, gramas e quantas peças na prancha. Chaveiro e NFC entram com preço fixo.';
       document.title = 'Ficha de custo · uso interno | Minted';
     }
 
-    if (!extrasOn) {
-      setRing(false, true);
-      setNfc(false, true);
-      setPacked(false, true);
-    }
+    if (!extrasOn) setPacked(false, true);
     const hash = next === 'personal' ? 'pessoais' : (next === 'advanced' ? 'avancada' : 'simples');
     if ((location.hash || '').replace(/^#/, '') !== hash) {
       history.replaceState(null, '', '#' + hash);
@@ -1491,8 +1495,8 @@
       filamentoKg: parseMoney(precoKg.value),
       acabamento: FINISH[d.finish] ? FINISH[d.finish].label : d.finish,
       personalizado: d.custom ? 'Sim' : 'Não',
-      argola: extrasOn && d.withRing ? round2(d.ringCost) : 0,
-      nfc: extrasOn && d.withNfc ? round2(d.nfcCost) : 0,
+      argola: d.withRing ? round2(d.ringCost) : 0,
+      nfc: d.withNfc ? round2(d.nfcCost) : 0,
       embalagem: extrasOn && d.packed ? ((PACKAGING[d.packType] || {}).label || '') : '',
       custoFilamento: round2(d.fil),
       custoDepreciacao: round2(d.dep),
@@ -1614,10 +1618,12 @@
     if (d.custom) lines.push('*Tipo:* personalizado');
     if (d.advanced && !d.personal) lines.push('*Margem:* ' + pctLabel(d.marginRate));
     lines.push('*Acabamento:* ' + FINISH[d.finish].label);
-    if (d.advanced) {
-      lines.push('*Argola:* ' + (d.withRing ? 'sim (' + money(d.ringCost) + ')' : 'não'));
-      lines.push('*NFC:* ' + (d.withNfc ? 'sim (' + money(d.nfcCost) + ')' : 'não'));
-      lines.push('*Embalagem:* ' + (d.packed ? PACKAGING[d.packType].label + ' (' + money(d.packCost) + ')' : 'não'));
+    if (d.withRing || d.withNfc || d.advanced) {
+      lines.push('*Chaveiro:* ' + (d.withRing ? 'sim (custa ' + money(d.ringCost) + ' · cobra ' + money(d.ringPrice) + ')' : 'não'));
+      lines.push('*NFC:* ' + (d.withNfc ? 'sim (custa ' + money(d.nfcCost) + ' · cobra ' + money(d.nfcPrice) + ')' : 'não'));
+      if (d.advanced) {
+        lines.push('*Embalagem:* ' + (d.packed ? PACKAGING[d.packType].label + ' (' + money(d.packCost) + ')' : 'não'));
+      }
     }
     lines.push('');
     lines.push('*Custo estimado:* ' + money(d.cost));
@@ -1651,10 +1657,12 @@
         (d.personal
           ? '<div><span class="k">Modo</span><span class="v">Proj. pessoais · 20%</span></div>'
           : '') +
-        (d.advanced
-          ? '<div><span class="k">Argola</span><span class="v">' + (d.withRing ? 'Sim' : 'Não') + '</span></div>' +
-            '<div><span class="k">NFC</span><span class="v">' + (d.withNfc ? 'Sim' : 'Não') + '</span></div>' +
-            '<div><span class="k">Embalagem</span><span class="v">' + (d.packed ? escapeHtml(PACKAGING[d.packType].label) : 'Não') + '</span></div>'
+        ((d.withRing || d.withNfc || d.advanced)
+          ? '<div><span class="k">Chaveiro</span><span class="v">' + (d.withRing ? 'Sim · ' + escapeHtml(money(d.ringPrice)) : 'Não') + '</span></div>' +
+            '<div><span class="k">NFC</span><span class="v">' + (d.withNfc ? 'Sim · ' + escapeHtml(money(d.nfcPrice)) : 'Não') + '</span></div>' +
+            (d.advanced
+              ? '<div><span class="k">Embalagem</span><span class="v">' + (d.packed ? escapeHtml(PACKAGING[d.packType].label) : 'Não') + '</span></div>'
+              : '')
           : '') +
         '<div><span class="k">Custo estimado</span><span class="v">' + escapeHtml(money(d.cost)) + '</span></div>' +
         extra +
@@ -1794,21 +1802,27 @@
     const costRaw = fil + dep + energy;
     const erro = costRaw * ERROR;
     const printCost = costRaw + erro;
-    const ringCost = (extrasOn && withRing) ? RING_UNIT * units : 0;
-    const nfcCost = (extrasOn && withNfc) ? NFC_UNIT * units : 0;
-    const packCost = (extrasOn && packed) ? packUnit(packType) * units : 0;
-    const extras = ringCost + nfcCost + packCost;
-    const cost = printCost + extras;
+    const ringCost = withRing ? RING_COST * units : 0;
+    const nfcCost = withNfc ? NFC_COST * units : 0;
+    const ringPrice = withRing ? RING_PRICE * units : 0;
+    const nfcPrice = withNfc ? NFC_PRICE * units : 0;
     const marginRate = currentMargin();
+    const packCost = (extrasOn && packed) ? packUnit(packType) * units : 0;
+    const pricedPack = packCost * (1 + marginRate);
+    const cost = printCost + ringCost + nfcCost + packCost;
     const pricedPrint = printCost * (1 + marginRate);
-    const pricedExtras = extras * (1 + marginRate);
     const painted = finish === 'pintado';
     const paintExtra = painted ? pricedPrint * (PAINT_MULT - 1) : 0;
-    const price = (painted ? pricedPrint * PAINT_MULT : pricedPrint) + pricedExtras;
-    const marginReais = (pricedPrint + pricedExtras) - cost;
+    const printAsk = painted ? pricedPrint * PAINT_MULT : pricedPrint;
+    const price = printAsk + ringPrice + nfcPrice + pricedPack;
+    const ringProfit = ringPrice - ringCost;
+    const nfcProfit = nfcPrice - nfcCost;
+    const packProfit = pricedPack - packCost;
+    const marginReais = (pricedPrint - printCost) + packProfit + ringProfit + nfcProfit;
     const lucro = price - cost;
-    const floor15 = price * (1 - NEGO_STD);
-    const floor25 = price * (1 - NEGO_MAX);
+    const flex = printAsk + pricedPack;
+    const floor15 = flex * (1 - NEGO_STD) + ringPrice + nfcPrice;
+    const floor25 = flex * (1 - NEGO_MAX) + ringPrice + nfcPrice;
     const roi = cost > 0 ? lucro / cost : 0;
     const roa = PRINTER_ASSET > 0 ? lucro / PRINTER_ASSET : 0;
     const ros = price > 0 ? lucro / price : 0;
@@ -1821,7 +1835,7 @@
     last = {
       project, units, printH, grams, finish, custom, cost, price, floor15, floor25,
       advanced: extrasOn, personal: isPers, withRing, withNfc, packed, packType,
-      ringCost, nfcCost, packCost, roi, roa, ros, markup, marginRate,
+      ringCost, nfcCost, ringPrice, nfcPrice, packCost, roi, roa, ros, markup, marginRate,
       unitH, unitGrams, locoH, locoFactor,
       fil, dep, energy, erro, paintExtra, lucro
     };
@@ -1840,7 +1854,9 @@
       ? money(price / units) + ' / un · ' + units + ' na prancha'
       : '';
     $('faixa').textContent = money(floor15) + ' — ' + money(price);
-    $('faixaNota').textContent = 'Até 15% de folga. Piso se ceder mais: ' + money(floor25) + '.';
+    $('faixaNota').textContent = 'Até 15% de folga na impressão' + (pricedPack ? ' e na embalagem' : '')
+      + '. Piso se ceder mais: ' + money(floor25) + '.'
+      + ((ringPrice || nfcPrice) ? ' Chaveiro e NFC ficam fora do desconto.' : '');
     $('outProjeto').textContent = project.display || '—';
     $('outUn').textContent = String(units);
     $('outTempo').textContent = units > 1
@@ -1859,41 +1875,48 @@
     $('outDep').textContent = money(dep);
     $('outLuz').textContent = money(energy);
     $('outErro').textContent = money(erro);
-    $('rowRing').hidden = !(extrasOn && withRing);
-    $('outRing').textContent = money(ringCost) + (units > 1 ? ' · ' + units + ' un' : '');
-    $('rowNfc').hidden = !(extrasOn && withNfc);
-    $('outNfc').textContent = money(nfcCost) + (units > 1 ? ' · ' + units + ' un' : '');
+    const perUn = units > 1 ? ' · ' + units + ' un' : '';
+    $('rowRing').hidden = !withRing;
+    $('outRing').textContent = money(ringCost) + ' custo · ' + money(ringPrice) + ' no preço' + perUn;
+    $('rowNfc').hidden = !withNfc;
+    $('outNfc').textContent = money(nfcCost) + ' custo · ' + money(nfcPrice) + ' no preço' + perUn;
     $('rowPack').hidden = !(extrasOn && packed);
     $('outPackLabel').textContent = packed ? 'Embalagem · ' + PACKAGING[packType].label : 'Embalagem';
-    $('outPack').textContent = money(packCost) + (units > 1 ? ' · ' + units + ' un' : '');
+    $('outPack').textContent = money(packCost) + ' custo · ' + money(pricedPack) + ' no preço' + perUn;
     $('outCusto').textContent = money(cost);
-    $('outMargemLabel').textContent = isPers
+    const margemBits = [];
+    if (withRing) margemBits.push('chaveiro');
+    if (withNfc) margemBits.push('NFC');
+    if (packCost) margemBits.push('embalagem');
+    $('outMargemLabel').textContent = (isPers
       ? 'Margem 20%'
       : (mode === 'advanced'
         ? 'Margem ' + pctLabel(marginRate) + (custom ? ' (personalizado)' : '')
-        : (custom ? 'Margem 120% (personalizado)' : 'Margem 70%'));
+        : (custom ? 'Margem 120% (personalizado)' : 'Margem 70%')))
+      + (margemBits.length ? ' · inclui ' + margemBits.join(', ') : '');
     $('outMargem').textContent = money(marginReais);
     $('rowPaint').hidden = !painted;
     $('outPaint').textContent = money(paintExtra);
     $('outLucroPedir').textContent = money(lucro);
 
-    const marginStd = cost * MARGIN_STD;
-    const customExtra = custom ? cost * (MARGIN_CUSTOM - MARGIN_STD) : 0;
+    const printMargin = pricedPrint - printCost;
     const layers = [
       { label: 'Custo impressão', value: costRaw, color: '#1e8fbe' },
       { label: 'Folga 15%', value: erro, color: '#3d7ea6' }
     ];
-    if (ringCost) layers.push({ label: 'Argola', value: ringCost, color: '#c45c26' });
-    if (nfcCost) layers.push({ label: 'NFC', value: nfcCost, color: '#1aa7c4' });
-    if (packCost) layers.push({ label: PACKAGING[packType].label, value: packCost, color: '#8a6a3d' });
     if (isPers) {
-      layers.push({ label: 'Margem 20%', value: cost * MARGIN_PERSONAL, color: '#0f9c6f' });
+      layers.push({ label: 'Margem 20%', value: printMargin, color: '#0f9c6f' });
     } else if (mode === 'advanced') {
-      layers.push({ label: 'Margem ' + pctLabel(marginRate), value: cost * marginRate, color: '#0f9c6f' });
+      layers.push({ label: 'Margem ' + pctLabel(marginRate), value: printMargin, color: '#0f9c6f' });
+    } else if (custom) {
+      layers.push({ label: 'Margem 70%', value: printCost * MARGIN_STD, color: '#0f9c6f' });
+      layers.push({ label: 'Personalizado', value: printCost * (MARGIN_CUSTOM - MARGIN_STD), color: '#7c5cbf' });
     } else {
-      layers.push({ label: 'Margem 70%', value: marginStd, color: '#0f9c6f' });
-      if (custom) layers.push({ label: 'Personalizado', value: customExtra, color: '#7c5cbf' });
+      layers.push({ label: 'Margem 70%', value: printMargin, color: '#0f9c6f' });
     }
+    if (ringPrice) layers.push({ label: 'Chaveiro', value: ringPrice, color: '#c45c26' });
+    if (nfcPrice) layers.push({ label: 'NFC', value: nfcPrice, color: '#1aa7c4' });
+    if (pricedPack) layers.push({ label: PACKAGING[packType].label, value: pricedPack, color: '#8a6a3d' });
     if (painted) layers.push({ label: 'Pintura à mão', value: paintExtra, color: '#d4a017' });
     const max = price || 1;
     $('chart').innerHTML = layers.map((s) => {
@@ -1921,12 +1944,13 @@
       $('kpiUnit').textContent = money(cost / units) + '  →  ' + money(price / units);
       $('kpiUnitNote').textContent = 'custo/un · preço/un · lucro ' + money(lucro / units) + '/un';
       const extrasBits = [];
-      if (withRing) extrasBits.push('argola');
-      if (withNfc) extrasBits.push('NFC');
+      if (withRing) extrasBits.push('chaveiro ' + money(RING_PRICE));
+      if (withNfc) extrasBits.push('NFC ' + money(NFC_PRICE));
       if (packed) extrasBits.push(PACKAGING[packType].label.toLowerCase());
-      const extrasTxt = extrasBits.length
+      const extrasTxt = (extrasBits.length
         ? ' Adicionais neste pedido: ' + extrasBits.join(', ') + '.'
-        : '';
+        : '')
+        + ((withRing || withNfc) ? ' Chaveiro e NFC têm preço fixo e não seguem a margem da impressão.' : '');
       $('kpiNote').textContent = isPers
         ? ('Margem fixa de 20%, sem faixa de negociação. ROA mede o retorno deste pedido sobre a impressora de ' + money(PRINTER_ASSET) + '.' + extrasTxt)
         : ((roi >= 1
