@@ -38,8 +38,14 @@
     padding: 6px 11px; border-radius: var(--r-full);
   }
   main { padding: 28px 0 64px; }
+  .calc-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 400px);
+    gap: 16px; align-items: start;
+    max-width: 980px; margin-inline: auto;
+  }
   .sheet {
-    max-width: 560px; margin-inline: auto;
+    max-width: none; margin: 0;
     background: var(--card); border: 1px solid var(--line);
     border-radius: 18px; box-shadow: var(--shadow-1); overflow: hidden;
   }
@@ -98,8 +104,44 @@
   }
   .hint b { font-family: var(--font-mono); font-weight: 500; color: var(--ink-2); }
   .out-note {
-    margin: 0 18px 16px; text-align: center;
+    margin: 0 18px 8px; text-align: center;
     font-size: 13px; color: var(--ink-3); line-height: 1.4;
+  }
+  .dre-card {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 18px; box-shadow: var(--shadow-1); overflow: hidden;
+  }
+  .dre-card .out { margin: 8px; }
+  .dre {
+    margin: 0 8px 8px; padding: 4px 14px 12px;
+    border-top: 1px solid var(--line);
+  }
+  .dre__kicker {
+    margin: 12px 0 2px;
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--mint-ink);
+  }
+  .dre__meta {
+    margin: 0 0 8px; font-size: 13px; color: var(--ink-3); line-height: 1.4;
+  }
+  .dre__rows { list-style: none; margin: 0; padding: 0; }
+  .dre__rows li {
+    display: flex; justify-content: space-between; gap: 12px;
+    padding: 8px 0; border-bottom: 1px solid var(--line);
+    font-size: 14px; color: var(--ink-2);
+  }
+  .dre__rows b {
+    font-family: var(--font-mono); font-weight: 500; font-size: 13px; color: var(--ink);
+    white-space: nowrap;
+  }
+  .dre__rows li.is-total { font-weight: 700; color: var(--ink); }
+  .dre__rows li.is-lucro b { color: var(--mint-ink); }
+  .dre__rows li.is-price {
+    border-bottom: 0; padding-top: 12px;
+    font-family: var(--font-display); font-weight: 800; font-size: 16px; color: var(--navy);
+  }
+  @media (max-width: 860px) {
+    .calc-layout { grid-template-columns: minmax(0, 1fr); }
   }
   @media (max-width: 640px) {
     .badge { display: none; }
@@ -133,6 +175,7 @@
 
 <main>
   <div class="container">
+    <div class="calc-layout">
     <form class="sheet" id="form" autocomplete="off">
       <div class="sheet__body">
         <div class="field">
@@ -169,20 +212,26 @@
           </div>
         </div>
       </div>
-      <p class="out is-wait" id="out" aria-live="polite">Cole o link do MakerWorld.</p>
-      <p class="out-note" id="outNote" hidden></p>
     </form>
+    <aside class="dre-card" aria-live="polite">
+      <p class="out is-wait" id="out">Cole o link do MakerWorld.</p>
+      <p class="out-note" id="outNote" hidden></p>
+      <div class="dre" id="dre" hidden></div>
+    </aside>
+    </div>
   </div>
 </main>
 
 <script src="mw-worker.js"></script>
 <script>
 (function () {
-  const DEPRECIATION_PER_H = 3000 / 5000;
+  const DEPRECIATION_PER_H = 1;
   const ENERGY_PER_H = 1;
   const CALIBRATION_H = 20 / 60;
   const ERROR = 0.15;
+  const RING_COST = 1;
   const RING_PRICE = 2;
+  const NFC_COST = 2;
   const NFC_PRICE = 2.5;
   const FILAMENT_KG_DEFAULT = 100;
   const MARGIN = 0.70;
@@ -223,6 +272,19 @@
     return FILAMENT_KG_DEFAULT;
   }
 
+  function fmtHours(h) {
+    const totalMin = Math.round(h * 60);
+    const hh = Math.floor(totalMin / 60);
+    const mm = totalMin % 60;
+    if (hh && mm) return hh + ' h ' + mm + ' min';
+    if (hh) return hh + ' h';
+    return mm + ' min';
+  }
+
+  function row(label, value, cls) {
+    return '<li' + (cls ? ' class="' + cls + '"' : '') + '><span>' + label + '</span><b>' + value + '</b></li>';
+  }
+
   function priceOf(job) {
     const baseH = job.seconds / 3600;
     const painted = cores === 'pintado';
@@ -230,29 +292,64 @@
     const swaps = (nCores - 1) * SWAPS_PER_H_PER_EXTRA * baseH;
     const machineH = baseH + (swaps * SWAP_S / 3600) + CALIBRATION_H;
     const grams = job.grams + swaps * WASTE_G;
-    const raw = (grams / 1000) * kgPrice() + (DEPRECIATION_PER_H + ENERGY_PER_H) * machineH;
-    let price = raw * (1 + ERROR) * (1 + MARGIN);
-    if (painted) price *= PAINT;
-    if (chaveiro) price += RING_PRICE;
-    if (nfc) price += NFC_PRICE;
-    return price;
+    const kg = kgPrice();
+    const fil = (grams / 1000) * kg;
+    const dep = DEPRECIATION_PER_H * machineH;
+    const energy = ENERGY_PER_H * machineH;
+    const printRaw = fil + dep + energy;
+    const erro = printRaw * ERROR;
+    const printCost = printRaw + erro;
+    let printPrice = printCost * (1 + MARGIN);
+    const paintExtra = painted ? printPrice * (PAINT - 1) : 0;
+    if (painted) printPrice += paintExtra;
+    const ringPrice = chaveiro ? RING_PRICE : 0;
+    const nfcPrice = nfc ? NFC_PRICE : 0;
+    const price = printPrice + ringPrice + nfcPrice;
+    const cost = printCost + (chaveiro ? RING_COST : 0) + (nfc ? NFC_COST : 0);
+    return {
+      kg, grams, machineH, fil, dep, energy, erro, printCost,
+      printPrice, paintExtra, ringPrice, nfcPrice, price, cost, painted, nCores
+    };
   }
 
   function showWait(text) {
     out.className = 'out is-wait';
     out.textContent = text;
     $('outNote').hidden = true;
+    $('dre').hidden = true;
   }
 
-  function showPrice(value) {
+  function showPrice(d) {
     out.className = 'out is-price';
-    out.textContent = 'PREÇO: ' + money(value);
+    out.textContent = 'PREÇO: ' + money(d.price);
     const bits = [];
     if (chaveiro) bits.push('chaveiro ' + money(RING_PRICE));
     if (nfc) bits.push('NFC ' + money(NFC_PRICE));
     const note = $('outNote');
     note.hidden = bits.length === 0;
     note.textContent = bits.length ? 'Inclui ' + bits.join(' e ') + '.' : '';
+    const margem = d.printCost * MARGIN;
+    const lines = [
+      row('Filamento · ' + d.kg.toLocaleString('pt-BR') + ' R$/kg', money(d.fil)),
+      row('Depreciação · R$ 1/h', money(d.dep)),
+      row('Energia · R$ 1/h', money(d.energy)),
+      row('Folga de erro 15%', money(d.erro)),
+      row('Custo', money(d.printCost), 'is-total'),
+      row('Margem 70%', money(margem), 'is-lucro')
+    ];
+    if (d.paintExtra) lines.push(row('Pintura à mão', money(d.paintExtra)));
+    if (d.ringPrice) lines.push(row('Chaveiro', money(d.ringPrice)));
+    if (d.nfcPrice) lines.push(row('NFC', money(d.nfcPrice)));
+    lines.push(row('Preço', money(d.price), 'is-price'));
+    lines.push(row('Lucro', money(d.price - d.cost), 'is-lucro'));
+    const dre = $('dre');
+    dre.hidden = false;
+    dre.innerHTML = '<p class="dre__kicker">DRE da peça</p>'
+      + '<p class="dre__meta">' + fmtHours(d.machineH) + ' de máquina, com 20 min de calibragem · '
+      + (Math.round(d.grams * 10) / 10).toLocaleString('pt-BR') + ' g'
+      + (d.nCores > 1 ? ' · ' + d.nCores + ' cores' : '')
+      + (d.painted ? ' · pintado à mão' : '')
+      + '</p><ul class="dre__rows">' + lines.join('') + '</ul>';
   }
 
   function render() {

@@ -154,7 +154,7 @@
   [hidden] { display: none !important; }
   form[name="minted-projetos"] { display: none !important; }
   .mode-bar {
-    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px;
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px;
     background: var(--paper); border: 1.5px solid var(--line-strong);
     border-radius: 12px; padding: 5px; margin-bottom: 4px;
   }
@@ -330,6 +330,23 @@
     letter-spacing: -0.04em; line-height: 1.05; color: #fff; margin-top: 4px;
   }
   .per-unit { color: var(--on-dark-muted); font-size: 14.5px; margin-top: 4px; }
+  .dre { margin-top: 16px; }
+  .dre__kicker {
+    font-family: var(--font-mono); font-size: 11.5px; letter-spacing: .14em;
+    text-transform: uppercase; color: #56e6b8; margin-bottom: 4px;
+  }
+  .dre__rows { list-style: none; margin: 0; padding: 0; }
+  .dre__rows li {
+    display: flex; justify-content: space-between; gap: 12px;
+    padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,.1);
+    font-size: 14px; color: var(--on-dark-muted);
+  }
+  .dre__rows b {
+    color: #fff; font-family: var(--font-mono); font-weight: 500; font-size: 13px;
+    white-space: nowrap;
+  }
+  .dre__rows li.is-total { color: #fff; }
+  .dre__rows li.is-lucro b { color: #56e6b8; }
   .range-card {
     margin-top: 18px; padding: 14px;
     background: rgba(255,255,255,.05);
@@ -505,7 +522,7 @@
     .in input.big { font-size: 22px; }
     .seg { grid-template-columns: 1fr; }
     .seg--2, .seg--pack { grid-template-columns: 1fr 1fr; }
-    .mode-bar { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .mode-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .mode-bar button { min-width: 0; white-space: normal; font-size: 12px; line-height: 1.15; }
     .calc-badge { letter-spacing: .06em; padding: 6px 8px; }
     .assumptions li { align-items: baseline; }
@@ -696,9 +713,10 @@
             <div class="mode-bar" role="group" aria-label="Modo da calculadora">
               <button type="button" data-mode="simple" aria-pressed="true">Simples</button>
               <button type="button" data-mode="advanced" aria-pressed="false">Avançada</button>
+              <button type="button" data-mode="reseller" aria-pressed="false">Revendedores</button>
               <button type="button" data-mode="personal" aria-pressed="false">Proj. Pessoais</button>
             </div>
-            <p class="hint" id="modeHint">Impressão com margem de 70%. Chaveiro cobra R$ 2 e NFC R$ 2,50, fora dessa margem. Embalagem fica na avançada.</p>
+            <p class="hint" id="modeHint">Custo com folga de 15%. Margem de 70% em cima desse total. Chaveiro cobra R$ 2 e NFC R$ 2,50.</p>
           </div>
 
           <div class="field">
@@ -765,7 +783,7 @@
             <div class="field">
               <label for="precoKg">Filamento</label>
               <div class="in is-wide">
-                <input class="big" type="text" id="precoKg" name="precoKg" inputmode="decimal" placeholder="0,00" />
+                <input class="big" type="text" id="precoKg" name="precoKg" inputmode="decimal" placeholder="100,00" value="100" />
                 <span class="sfx">R$/kg</span>
               </div>
             </div>
@@ -846,7 +864,8 @@
             <li><span>Calibragem</span><b id="assCalib">+ 20 min · 1 un</b></li>
             <li><span>Folga de erro</span><b>+ 15%</b></li>
             <li><span>Margem</span><b id="assMargem">70%</b></li>
-            <li><span>Depreciação + luz</span><b>R$ 0,60/h + R$ 1,00/h</b></li>
+            <li><span>Depreciação</span><b>R$ 1,00/h</b></li>
+            <li><span>Energia</span><b>R$ 1,00/h</b></li>
             <li id="assAsset" hidden><span>Ativo (impressora)</span><b>R$ 3.000</b></li>
             <li id="assRing" hidden><span>Chaveiro</span><b>custa R$ 1 · cobra R$ 2</b></li>
             <li id="assNfc" hidden><span>NFC</span><b>custa R$ 2 · cobra R$ 2,50</b></li>
@@ -865,6 +884,11 @@
             <span class="label">Preço a pedir</span>
             <strong id="precoPedir">R$ 0,00</strong>
             <p class="per-unit" id="perUnit"></p>
+          </div>
+
+          <div class="dre" id="dre">
+            <div class="dre__kicker">DRE</div>
+            <ul class="dre__rows" id="dreRows"></ul>
           </div>
 
           <div class="range-card">
@@ -1002,7 +1026,7 @@
         <li>Tempo só das trocas no teste = 776 × 35 s. Isso sai do relógio total e sobra o tempo em que a máquina imprimia o modelo.</li>
         <li>O teste tem 3 cores além da primeira. Trocas por hora de modelo, por cor extra = 776 ÷ 3 ÷ tempo do modelo.</li>
         <li>Nesta peça, trocas = (cores − 1) × essa taxa × horas do modelo. As horas são as que estão em “horas” e “minutos”, de uma prancha. A calibragem de 20 min não entra nessa base e não se repete por cor.</li>
-        <li>Tempo a mais = trocas × 35 s. Esse tempo paga depreciação (R$ 0,60/h) e luz (R$ 1,00/h).</li>
+        <li>Tempo a mais = trocas × 35 s. Esse tempo paga depreciação (R$ 1,00/h) e luz (R$ 1,00/h).</li>
         <li>Gramas a mais = trocas × (150 g + 42 g) ÷ 776. Os 150 g são a purga. Os 42 g são a torre. Os dois viajam juntos porque, no teste, a torre também foi resíduo da troca. Essas gramas entram no preço do filamento (R$/kg desta ficha).</li>
         <li>Filamento extra + máquina extra recebem a folga de 15%. O preço da impressão é esse custo com margem de 70%: preço = custo × 1,70. Chaveiro e NFC entram depois, com preço fixo: chaveiro R$ 2 (custa R$ 1) e NFC R$ 2,50 (custa R$ 2). Não passam pela folga nem pela margem. Uma cor não soma troca nem purga.</li>
         <li>Pintado à mão não usa troca nem purga. É o preço de 1 cor, já com a margem de 70%, mais 30%.</li>
@@ -1056,7 +1080,7 @@
 
 <script>
 (function () {
-  const DEPRECIATION_PER_H = 3000 / 5000;
+  const DEPRECIATION_PER_H = 1;
   const ENERGY_PER_H = 1;
   const CALIBRATION_MIN = 20;
   const CALIBRATION_H = CALIBRATION_MIN / 60;
@@ -1064,6 +1088,8 @@
   const MARGIN_STD = 0.70;
   const MARGIN_CUSTOM = 1.20;
   const MARGIN_PERSONAL = 0.20;
+  const MARGIN_RESELLER = 0.50;
+  const FILAMENT_KG_DEFAULT = 100;
   const NEGO_STD = 0.15;
   const NEGO_MAX = 0.25;
   const PAINT_MULT = 2;
@@ -1154,7 +1180,7 @@
     'margemPct', 'margemReais', 'pinturaExtra', 'preco', 'precoUn', 'lucro',
     'negoOk', 'negoPiso', 'roi', 'ros', 'markup'
   ];
-  const MODE_LABEL = { simple: 'Simples', advanced: 'Avançada', personal: 'Proj. pessoais' };
+  const MODE_LABEL = { simple: 'Simples', advanced: 'Avançada', reseller: 'Revendedores', personal: 'Proj. pessoais' };
 
   function emptyPart() {
     return {
@@ -1225,7 +1251,7 @@
   }
 
   function setCustom(on) {
-    if (mode === 'personal') return;
+    if (mode === 'personal' || mode === 'reseller') return;
     custom = on;
     btnCustom.setAttribute('aria-pressed', on ? 'true' : 'false');
     if (mode === 'advanced') {
@@ -1249,27 +1275,36 @@
     mode = next;
     const extrasOn = next !== 'simple';
     const isPers = next === 'personal';
+    const isReseller = next === 'reseller';
     modeBtns.forEach((b) => b.setAttribute('aria-pressed', b.dataset.mode === next ? 'true' : 'false'));
     $('advancedPanel').classList.toggle('is-on', extrasOn);
     $('assAsset').hidden = !extrasOn;
-    $('customField').hidden = isPers;
+    $('customField').hidden = isPers || isReseller;
     $('marginField').hidden = next !== 'advanced';
     if (next === 'advanced' && !String(margemInput.value || '').trim()) {
       margemInput.value = custom ? '100' : '70';
     }
-    $('faixa').hidden = isPers;
-    $('faixaNota').hidden = isPers;
-    $('negoRow').hidden = isPers;
-    $('rangeTitle').textContent = isPers ? 'Composição do preço' : 'Faixa de negociação';
+    $('faixa').hidden = isPers || isReseller;
+    $('faixaNota').hidden = isPers || isReseller;
+    $('negoRow').hidden = isPers || isReseller;
+    $('rangeTitle').textContent = (isPers || isReseller) ? 'Composição do preço' : 'Faixa de negociação';
 
-    if (isPers) {
+    if (isReseller) {
+      custom = false;
+      btnCustom.setAttribute('aria-pressed', 'false');
+      $('assMargem').textContent = '50%';
+      $('introSpec').textContent = 'Calculadora Revendedores';
+      $('modeHint').textContent = 'Mesma conta, com margem de 50% em cima do custo. O preço é o de revenda.';
+      $('introLead').textContent = 'Para revendedor: filamento, máquina e a folga de 15%, com margem de 50% em cima de tudo isso.';
+      document.title = 'Calculadora Revendedores · uso interno | Minted';
+    } else if (isPers) {
       custom = false;
       btnCustom.setAttribute('aria-pressed', 'false');
       $('customHint').textContent = 'Margem 70%. Toque para 120%.';
       $('assMargem').textContent = '20%';
       $('introSpec').textContent = 'Calculadora Proj. Pessoais';
-      $('modeHint').textContent = 'Margem fixa de 20% na impressão. Chaveiro cobra R$ 2 e NFC R$ 2,50, fora dessa margem. Sem negociação.';
-      $('introLead').textContent = 'Mesmos dados da avançada, com margem de 20% na impressão. Chaveiro e NFC têm preço fixo. O preço a pedir é o preço — sem faixa de desconto.';
+      $('modeHint').textContent = 'Margem fixa de 20% na impressão. Chaveiro cobra R$ 2 e NFC R$ 2,50. Sem negociação.';
+      $('introLead').textContent = 'Mesmos dados da avançada, com margem de 20%.';
       document.title = 'Calculadora Proj. Pessoais · uso interno | Minted';
     } else if (extrasOn) {
       syncMarginLabel();
@@ -1282,13 +1317,13 @@
       $('assMargem').textContent = custom ? '120%' : '70%';
       $('customHint').textContent = custom ? 'Margem 120%.' : 'Margem 70%. Toque para 120%.';
       $('introSpec').textContent = 'Ficha de custo';
-      $('modeHint').textContent = 'Impressão com margem de 70%. Chaveiro cobra R$ 2 e NFC R$ 2,50, fora dessa margem. Embalagem fica na avançada.';
-      $('introLead').textContent = 'Link, tempo, gramas e quantas peças na prancha. Chaveiro e NFC entram com preço fixo.';
+      $('modeHint').textContent = 'Custo com folga de 15%. Margem de 70% em cima desse total. Chaveiro cobra R$ 2 e NFC R$ 2,50.';
+      $('introLead').textContent = 'Link, tempo, gramas e quantas peças na prancha. A DRE abre ao lado, assim que o MakerWorld responde.';
       document.title = 'Ficha de custo · uso interno | Minted';
     }
 
     if (!extrasOn) setPacked(false, true);
-    const hash = next === 'personal' ? 'pessoais' : (next === 'advanced' ? 'avancada' : 'simples');
+    const hash = next === 'personal' ? 'pessoais' : (next === 'reseller' ? 'revendedores' : (next === 'advanced' ? 'avancada' : 'simples'));
     if ((location.hash || '').replace(/^#/, '') !== hash) {
       history.replaceState(null, '', '#' + hash);
     }
@@ -1336,6 +1371,7 @@
 
   function currentMargin() {
     if (mode === 'personal') return MARGIN_PERSONAL;
+    if (mode === 'reseller') return MARGIN_RESELLER;
     if (mode === 'advanced') {
       const raw = String(margemInput.value || '').trim();
       if (raw) {
@@ -1609,6 +1645,7 @@
     }
     lines.push('');
     if (d.personal) lines.push('*Modo:* projeto pessoal (margem 20%)');
+    if (d.reseller) lines.push('*Modo:* revendedor (margem 50%)');
     lines.push('*Unidades:* ' + d.units + (d.units > 1 ? ' na prancha' : ''));
     lines.push('*Tempo:* ' + fmtHours(d.printH) + (d.units > 1
       ? ' (' + d.units + ' × ' + fmtHours(d.unitH) + ' + ' + pctLabel(d.locoFactor) + ' locomoção)'
@@ -1656,7 +1693,9 @@
         '<div><span class="k">Acabamento</span><span class="v">' + escapeHtml(FINISH[d.finish].label) + '</span></div>' +
         (d.personal
           ? '<div><span class="k">Modo</span><span class="v">Proj. pessoais · 20%</span></div>'
-          : '') +
+          : (d.reseller
+            ? '<div><span class="k">Modo</span><span class="v">Revendedores · 50%</span></div>'
+            : '')) +
         ((d.withRing || d.withNfc || d.advanced)
           ? '<div><span class="k">Chaveiro</span><span class="v">' + (d.withRing ? 'Sim · ' + escapeHtml(money(d.ringPrice)) : 'Não') + '</span></div>' +
             '<div><span class="k">NFC</span><span class="v">' + (d.withNfc ? 'Sim · ' + escapeHtml(money(d.nfcPrice)) : 'Não') + '</span></div>' +
@@ -1782,15 +1821,16 @@
     $('locoHint').textContent = units > 1 && unitH > 0
       ? units + ' un × ' + fmtHours(unitH) + ' = ' + fmtHours(baseH) + ' + ' + pctLabel(locoFactor) + ' de locomoção (' + fmtHours(locoH) + ').'
       : 'Tempo extra do bico viajando entre as peças. Soma essa % ao tempo a cada unidade além da primeira.';
-    const kgPrice = parseMoney(precoKg.value);
+    const kgPrice = parseMoney(precoKg.value) || FILAMENT_KG_DEFAULT;
     renderKobra(unitH, kgPrice);
     const fil = (grams / 1000) * kgPrice;
     const ready = h > 0 || m > 0 || grams > 0;
     quote.dataset.ready = ready ? 'true' : 'false';
     const extrasOn = mode !== 'simple';
     const isPers = mode === 'personal';
+    const isReseller = mode === 'reseller';
     $('analysis').classList.toggle('is-on', ready && extrasOn);
-    if (!ready) { last = null; syncMarginPrice(null); renderPartsBar(); renderMarketVerdict(); return; }
+    if (!ready) { last = null; syncMarginPrice(null); $('dreRows').innerHTML = ''; renderPartsBar(); renderMarketVerdict(); return; }
 
     try { localStorage.setItem(KG_KEY, precoKg.value.trim()); } catch (_) {}
     try { localStorage.setItem(LOCO_KEY, $('locoPct').value.trim()); } catch (_) {}
@@ -1799,9 +1839,9 @@
     const machineH = printH + CALIBRATION_H;
     const dep = DEPRECIATION_PER_H * machineH;
     const energy = ENERGY_PER_H * machineH;
-    const costRaw = fil + dep + energy;
-    const erro = costRaw * ERROR;
-    const printCost = costRaw + erro;
+    const printRaw = fil + dep + energy;
+    const erro = printRaw * ERROR;
+    const printCost = printRaw + erro;
     const ringCost = withRing ? RING_COST * units : 0;
     const nfcCost = withNfc ? NFC_COST * units : 0;
     const ringPrice = withRing ? RING_PRICE * units : 0;
@@ -1809,8 +1849,8 @@
     const marginRate = currentMargin();
     const packCost = (extrasOn && packed) ? packUnit(packType) * units : 0;
     const pricedPack = packCost * (1 + marginRate);
-    const cost = printCost + ringCost + nfcCost + packCost;
     const pricedPrint = printCost * (1 + marginRate);
+    const cost = printCost + ringCost + nfcCost + packCost;
     const painted = finish === 'pintado';
     const paintExtra = painted ? pricedPrint * (PAINT_MULT - 1) : 0;
     const printAsk = painted ? pricedPrint * PAINT_MULT : pricedPrint;
@@ -1834,10 +1874,10 @@
 
     last = {
       project, units, printH, grams, finish, custom, cost, price, floor15, floor25,
-      advanced: extrasOn, personal: isPers, withRing, withNfc, packed, packType,
+      advanced: extrasOn, personal: isPers, reseller: isReseller, withRing, withNfc, packed, packType,
       ringCost, nfcCost, ringPrice, nfcPrice, packCost, roi, roa, ros, markup, marginRate,
       unitH, unitGrams, locoH, locoFactor,
-      fil, dep, energy, erro, paintExtra, lucro
+      fil, dep, energy, erro, paintExtra, lucro, marginReais, kgPrice
     };
     const cur = parts[partIndex];
     if (cur && cur.confirmed && cur.snapshot) {
@@ -1890,9 +1930,11 @@
     if (packCost) margemBits.push('embalagem');
     $('outMargemLabel').textContent = (isPers
       ? 'Margem 20%'
-      : (mode === 'advanced'
-        ? 'Margem ' + pctLabel(marginRate) + (custom ? ' (personalizado)' : '')
-        : (custom ? 'Margem 120% (personalizado)' : 'Margem 70%')))
+      : (isReseller
+        ? 'Margem 50% · revenda'
+        : (mode === 'advanced'
+          ? 'Margem ' + pctLabel(marginRate) + (custom ? ' (personalizado)' : '')
+          : (custom ? 'Margem 120% (personalizado)' : 'Margem 70%'))))
       + (margemBits.length ? ' · inclui ' + margemBits.join(', ') : '');
     $('outMargem').textContent = money(marginReais);
     $('rowPaint').hidden = !painted;
@@ -1901,11 +1943,13 @@
 
     const printMargin = pricedPrint - printCost;
     const layers = [
-      { label: 'Custo impressão', value: costRaw, color: '#1e8fbe' },
+      { label: 'Custo impressão', value: printRaw, color: '#1e8fbe' },
       { label: 'Folga 15%', value: erro, color: '#3d7ea6' }
     ];
     if (isPers) {
       layers.push({ label: 'Margem 20%', value: printMargin, color: '#0f9c6f' });
+    } else if (isReseller) {
+      layers.push({ label: 'Margem 50%', value: printMargin, color: '#0f9c6f' });
     } else if (mode === 'advanced') {
       layers.push({ label: 'Margem ' + pctLabel(marginRate), value: printMargin, color: '#0f9c6f' });
     } else if (custom) {
@@ -1928,6 +1972,23 @@
     $('negoDeep').textContent = money(floor25);
     $('negoOk').textContent = money(floor15);
     $('negoAsk').textContent = money(price);
+
+    const dreBits = [
+      ['Filamento · ' + kgPrice.toLocaleString('pt-BR') + ' R$/kg', fil],
+      ['Depreciação · R$ 1/h', dep],
+      ['Energia · R$ 1/h', energy],
+      ['Folga de erro 15%', erro]
+    ];
+    let dreHtml = dreBits.map((pair) => '<li><span>' + pair[0] + '</span><b>' + money(pair[1]) + '</b></li>').join('');
+    dreHtml += '<li class="is-total"><span>Custo da peça</span><b>' + money(printCost) + '</b></li>';
+    dreHtml += '<li class="is-lucro"><span>Margem ' + pctLabel(marginRate) + '</span><b>' + money(printCost * marginRate) + '</b></li>';
+    if (paintExtra) dreHtml += '<li><span>Pintura à mão</span><b>' + money(paintExtra) + '</b></li>';
+    if (ringPrice) dreHtml += '<li><span>Chaveiro</span><b>' + money(ringPrice) + '</b></li>';
+    if (nfcPrice) dreHtml += '<li><span>NFC</span><b>' + money(nfcPrice) + '</b></li>';
+    if (pricedPack) dreHtml += '<li><span>Embalagem</span><b>' + money(pricedPack) + '</b></li>';
+    dreHtml += '<li class="is-total"><span>Preço</span><b>' + money(price) + '</b></li>';
+    dreHtml += '<li class="is-lucro"><span>Lucro</span><b>' + money(lucro) + '</b></li>';
+    $('dreRows').innerHTML = dreHtml;
 
     if (extrasOn) {
       const fmtJobs = (n) => !Number.isFinite(n) ? '—' : (n < 10
@@ -1969,7 +2030,8 @@
 
   try {
     const saved = localStorage.getItem(KG_KEY);
-    if (saved) precoKg.value = saved;
+    if (saved && parseMoney(saved) > 0) precoKg.value = saved;
+    else if (!precoKg.value.trim()) precoKg.value = '100';
     const savedLoco = localStorage.getItem(LOCO_KEY);
     if (savedLoco !== null && savedLoco !== '') $('locoPct').value = savedLoco;
   } catch (_) {}
@@ -2369,6 +2431,7 @@
 
   const bootHash = (location.hash || '').replace(/^#/, '').toLowerCase();
   if (bootHash === 'pessoais' || bootHash === 'personal') setMode('personal');
+  else if (bootHash === 'revendedores' || bootHash === 'reseller') setMode('reseller');
   else if (bootHash === 'avancada' || bootHash === 'advanced') setMode('advanced');
   else compute();
   renderPartsBar();
