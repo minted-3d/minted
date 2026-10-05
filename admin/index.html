@@ -1541,7 +1541,7 @@
       custoExtras: round2((d.ringCost || 0) + (d.nfcCost || 0) + (d.packCost || 0)),
       custo: round2(d.cost),
       margemPct: marginRate,
-      margemReais: round2((d.price || 0) - (d.paintExtra || 0) - (d.cost || 0)),
+      margemReais: round2(d.marginReais),
       pinturaExtra: round2(d.paintExtra || 0),
       preco: round2(d.price),
       precoUn: d.units ? round2(d.price / d.units) : round2(d.price),
@@ -1855,10 +1855,8 @@
     const paintExtra = painted ? pricedPrint * (PAINT_MULT - 1) : 0;
     const printAsk = painted ? pricedPrint * PAINT_MULT : pricedPrint;
     const price = printAsk + ringPrice + nfcPrice + pricedPack;
-    const ringProfit = ringPrice - ringCost;
-    const nfcProfit = nfcPrice - nfcCost;
     const packProfit = pricedPack - packCost;
-    const marginReais = (pricedPrint - printCost) + packProfit + ringProfit + nfcProfit;
+    const marginReais = (pricedPrint - printCost) + packProfit;
     const lucro = price - cost;
     const flex = printAsk + pricedPack;
     const floor15 = flex * (1 - NEGO_STD) + ringPrice + nfcPrice;
@@ -1925,8 +1923,6 @@
     $('outPack').textContent = money(packCost) + ' custo · ' + money(pricedPack) + ' no preço' + perUn;
     $('outCusto').textContent = money(cost);
     const margemBits = [];
-    if (withRing) margemBits.push('chaveiro');
-    if (withNfc) margemBits.push('NFC');
     if (packCost) margemBits.push('embalagem');
     $('outMargemLabel').textContent = (isPers
       ? 'Margem 20%'
@@ -1983,8 +1979,8 @@
     dreHtml += '<li class="is-total"><span>Custo da peça</span><b>' + money(printCost) + '</b></li>';
     dreHtml += '<li class="is-lucro"><span>Margem ' + pctLabel(marginRate) + '</span><b>' + money(printCost * marginRate) + '</b></li>';
     if (paintExtra) dreHtml += '<li><span>Pintura à mão</span><b>' + money(paintExtra) + '</b></li>';
-    if (ringPrice) dreHtml += '<li><span>Chaveiro</span><b>' + money(ringPrice) + '</b></li>';
-    if (nfcPrice) dreHtml += '<li><span>NFC</span><b>' + money(nfcPrice) + '</b></li>';
+    if (ringPrice) dreHtml += '<li><span>Chaveiro · depois da margem</span><b>' + money(ringPrice) + '</b></li>';
+    if (nfcPrice) dreHtml += '<li><span>NFC · depois da margem</span><b>' + money(nfcPrice) + '</b></li>';
     if (pricedPack) dreHtml += '<li><span>Embalagem</span><b>' + money(pricedPack) + '</b></li>';
     dreHtml += '<li class="is-total"><span>Preço</span><b>' + money(price) + '</b></li>';
     dreHtml += '<li class="is-lucro"><span>Lucro</span><b>' + money(lucro) + '</b></li>';

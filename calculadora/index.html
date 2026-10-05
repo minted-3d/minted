@@ -338,8 +338,8 @@
       row('Margem 70%', money(margem), 'is-lucro')
     ];
     if (d.paintExtra) lines.push(row('Pintura à mão', money(d.paintExtra)));
-    if (d.ringPrice) lines.push(row('Chaveiro', money(d.ringPrice)));
-    if (d.nfcPrice) lines.push(row('NFC', money(d.nfcPrice)));
+    if (d.ringPrice) lines.push(row('Chaveiro · depois da margem', money(d.ringPrice)));
+    if (d.nfcPrice) lines.push(row('NFC · depois da margem', money(d.nfcPrice)));
     lines.push(row('Preço', money(d.price), 'is-price'));
     lines.push(row('Lucro', money(d.price - d.cost), 'is-lucro'));
     const dre = $('dre');
